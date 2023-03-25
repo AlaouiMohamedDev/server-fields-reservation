@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
+from django.http import JsonResponse
 from rest_framework.exceptions import AuthenticationFailed
 from .serializers import ComplexeSportifSerializer,TerrainSerializer,CategoryTerrainSerializer,PhotoSerializer
 from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo
@@ -71,7 +72,7 @@ def complexeId(request,pk):
 
 @api_view(['POST'])
 def complexeCreate(request):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can add complexe sportifs.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -85,7 +86,10 @@ def complexeCreate(request):
     serializer = ComplexeSportifSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         serializer.save(user=user)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    else:
+        print(serializer.errors)
+    return JsonResponse(({'message' : 'login successfully',
+                    'status':200}))
 
 
 @api_view(['POST'])

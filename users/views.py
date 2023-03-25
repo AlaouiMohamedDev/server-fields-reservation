@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from .serializers import UserSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,6 +7,8 @@ from rest_framework.exceptions import AuthenticationFailed
 from .models import User
 import jwt
 import datetime
+from rest_framework import status
+
 # Create your views here.
 
 
@@ -14,7 +17,8 @@ class RegisterView(APIView):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return JsonResponse(({'message' : 'registered successfully',
+                    'status':200}))
 
 
 class LoginView(APIView):
@@ -38,7 +42,8 @@ class LoginView(APIView):
         response.data = {
             'jwt': token
         }
-        return response
+        return JsonResponse(({'jwt': token,'message' : 'login successfully',
+                    'status':200}))
 
 
 class UserView(APIView):
