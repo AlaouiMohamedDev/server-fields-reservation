@@ -1,4 +1,4 @@
-pip install django
+pip install django --user
 pip install djangorestframework
 pip install markdown
 pip install django-filter
