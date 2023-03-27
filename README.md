@@ -16,7 +16,7 @@ This project is a football field reservation system that allows users to book a 
 
 ## Installation
 
-To deploy this project run
+To install dependencies for this project run
 
 ```bash
     pip install django --user
