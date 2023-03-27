@@ -53,7 +53,8 @@ def complexeList(request):
         return Response({'error': 'Only hosts can add list sportifs.'},status.HTTP_401_UNAUTHORIZED)
     complexeSportif = ComplexeSportif.objects.all()
     serializer = ComplexeSportifSerializer(complexeSportif, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'complexe retrieved',
+                    'status':200}))
 
 @api_view(['GET'])
 def complexeId(request,pk):
@@ -68,7 +69,8 @@ def complexeId(request,pk):
         return Response({'error': 'Only hosts can get complexe sportifs.'},status.HTTP_401_UNAUTHORIZED)
     complexeSportif = ComplexeSportif.objects.get(id=pk)
     serializer = ComplexeSportifSerializer(complexeSportif, many=False)
-    return Response(serializer.data,status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'complexe retrieved',
+                    'status':200}))
 
 @api_view(['POST'])
 def complexeCreate(request):
@@ -88,7 +90,7 @@ def complexeCreate(request):
         serializer.save(user=user)
     else:
         print(serializer.errors)
-    return JsonResponse(({'message' : 'login successfully',
+    return JsonResponse(({'message' : 'complexe added successfully',
                     'status':200}))
 
 
@@ -110,7 +112,8 @@ def complexeUpdate(request,pk):
     serializer = ComplexeSportifSerializer(instance = complexeSportif,data=request.data,context={'request': request})
     if serializer.is_valid():
         serializer.save(user=user)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'complexe updated succesfully',
+                    'status':200}))
 
 @api_view(['DELETE'])
 def complexeDelete(request,pk):
@@ -125,7 +128,8 @@ def complexeDelete(request,pk):
         return Response({'error': 'Only hosts can add complexe sportifs.'},status.HTTP_401_UNAUTHORIZED)
     complexeSportif = ComplexeSportif.objects.get(id=pk)
     complexeSportif.delete()
-    return Response('complexe deleted', status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'complexe deleted succesfully',
+                    'status':200}))
 
 
 #CRUD for fields 
@@ -147,7 +151,8 @@ def fieldCreate(request):
     serializer = TerrainSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field created succesfully',
+                    'status':200}))
 
 @api_view(['POST'])
 def fieldUpdate(request,pk):
@@ -164,7 +169,8 @@ def fieldUpdate(request,pk):
     serializer = TerrainSerializer(instance = terrain,data=request.data)
     if serializer.is_valid():
         serializer.save()
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field updated succesfully',
+                    'status':200}))
 
 @api_view(['DELETE'])
 def fieldDelete(request,pk):
@@ -179,7 +185,8 @@ def fieldDelete(request,pk):
         return Response({'error': 'Only hosts can delete fields.'},status.HTTP_401_UNAUTHORIZED)
     terrain = Terrain.objects.get(id=pk)
     terrain.delete()
-    return Response('field deleted',  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field deleted succesfully',
+                    'status':200}))
 
 @api_view(['GET'])
 def fieldList(request):
@@ -194,7 +201,8 @@ def fieldList(request):
         return Response({'error': 'Only hosts can list fields.'},status.HTTP_401_UNAUTHORIZED)
     terrain = Terrain.objects.all()
     serializer = TerrainSerializer(terrain, many=True)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field retrieved succesfully',
+                    'status':200}))
 
 @api_view(['GET'])
 def fieldId(request,pk):
@@ -209,7 +217,8 @@ def fieldId(request,pk):
         return Response({'error': 'Only hosts can get a field.'},status.HTTP_401_UNAUTHORIZED)
     terrain = Terrain.objects.get(id=pk)
     serializer = TerrainSerializer(terrain, many=False)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field retrieved succesfully',
+                    'status':200}))
 
 
 
@@ -233,7 +242,8 @@ def fieldCategoryList(request):
         return Response({'error': 'Only hosts can list fields.'},status.HTTP_401_UNAUTHORIZED)
     categoryTerrain = CategoryTerrain.objects.all()
     serializer = CategoryTerrainSerializer(categoryTerrain, many=True)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field categories retrieved succesfully',
+                    'status':200}))
 
 @api_view(['GET'])
 def fieldCategoryId(request,pk):
@@ -248,7 +258,8 @@ def fieldCategoryId(request,pk):
         return Response({'error': 'Only hosts can get a field.'},status.HTTP_401_UNAUTHORIZED)
     categoryterrain = CategoryTerrain.objects.get(id=pk)
     serializer = CategoryTerrainSerializer(categoryterrain, many=False)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field category retrieved succesfully',
+                    'status':200}))
 
 
 @api_view(['POST'])
@@ -268,7 +279,8 @@ def fieldCategoryCreate(request):
         serializer.save()
     else:
         print(serializer.errors)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field category created succesfully',
+                    'status':200}))
 
 @api_view(['POST'])
 def fieldCategoryUpdate(request,pk):
@@ -285,7 +297,8 @@ def fieldCategoryUpdate(request,pk):
     serializer = CategoryTerrainSerializer(instance = categoryTerrain,data=request.data)
     if serializer.is_valid():
         serializer.save()
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field category updated succesfully',
+                    'status':200}))
 
 @api_view(['DELETE'])
 def fieldCategoryDelete(request,pk):
@@ -300,7 +313,8 @@ def fieldCategoryDelete(request,pk):
         return Response({'error': 'Only hosts can delete field Categories.'},status.HTTP_401_UNAUTHORIZED)
     categoryterrain = CategoryTerrain.objects.get(id=pk)
     categoryterrain.delete()
-    return Response('field Category deleted',  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field category deleted succesfully',
+                    'status':200}))
 
 
 
@@ -324,7 +338,8 @@ def photoList(request):
         return Response({'error': 'Only hosts can list pictures.'},status.HTTP_401_UNAUTHORIZED)
     photo = Photo.objects.all()
     serializer =PhotoSerializer(photo, many=True)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field pictures retrieved succesfully',
+                    'status':200}))
 
 @api_view(['GET'])
 def photoId(request,pk):
@@ -339,7 +354,8 @@ def photoId(request,pk):
         return Response({'error': 'Only hosts can get a picutre.'},status.HTTP_401_UNAUTHORIZED)
     photo = Photo.objects.get(id=pk)
     serializer = PhotoSerializer(photo, many=False)
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field picture retrieved succesfully',
+                    'status':200}))
 
 
 @api_view(['POST'])
@@ -357,7 +373,8 @@ def photoCreate(request):
     serializer = PhotoSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field picture created succesfully',
+                    'status':200}))
 
 @api_view(['POST'])
 def photoUpdate(request,pk):
@@ -374,7 +391,8 @@ def photoUpdate(request,pk):
     serializer = PhotoSerializer(instance = photo,data=request.data)
     if serializer.is_valid():
         serializer.save()
-    return Response(serializer.data,  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field picture updated succesfully',
+                    'status':200}))
 
 @api_view(['DELETE'])
 def photoDelete(request,pk):
@@ -389,4 +407,5 @@ def photoDelete(request,pk):
         return Response({'error': 'Only hosts can delete pictures.'},status.HTTP_401_UNAUTHORIZED)
     photo = Photo.objects.get(id=pk)
     photo.delete()
-    return Response('field picture deleted',  status=status.HTTP_200_OK)
+    return JsonResponse(({'message' : 'field picture deleted succesfully',
+                    'status':200}))
