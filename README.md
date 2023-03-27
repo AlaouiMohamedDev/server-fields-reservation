@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 # Kri Tirank
 
 This project is a football field reservation system that allows users to book a football field in their desired location. The system provides features like path tracing, geolocation, user authentication, booking process, and sport complex registration.
@@ -58,4 +56,4 @@ python -m pip install mysqlclient
 pip install Pyjwt
 pip install django-cors-headers
 pip install django-rest-passwordreset
->>>>>>> f18a15e52c0cea8decbd8bd2c88c8cf8e796d205
+
