@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # Kri Tirank
 
@@ -47,3 +48,14 @@ The system provides management of services, plans, and offers. It also manages u
 - Centralized Management
 The system offers centralized management for authentication and authorizations of users of different modules. Lists with geolocation can be imported via web service API or JSON files.
 
+=======
+
+pip install django --user
+pip install djangorestframework
+pip install markdown
+pip install django-filter
+python -m pip install mysqlclient
+pip install Pyjwt
+pip install django-cors-headers
+pip install django-rest-passwordreset
+>>>>>>> f18a15e52c0cea8decbd8bd2c88c8cf8e796d205
