@@ -42,7 +42,7 @@ def apiOverview(request):
 
 @api_view(['GET'])
 def complexeList(request):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can add list sportifs.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -58,7 +58,7 @@ def complexeList(request):
 
 @api_view(['GET'])
 def complexeId(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can get complexe sportifs.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -94,7 +94,7 @@ def complexeCreate(request):
 @api_view(['POST'])
 def complexeUpdate(request,pk):
     user = request.user
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can add complexe sportifs.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -114,7 +114,7 @@ def complexeUpdate(request,pk):
 
 @api_view(['DELETE'])
 def complexeDelete(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can add complexe sportifs.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -136,7 +136,7 @@ def complexeDelete(request,pk):
 @api_view(['POST'])
 
 def fieldCreate(request):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can add fields.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -145,15 +145,17 @@ def fieldCreate(request):
         raise AuthenticationFailed('Unauthenticated')
     if not payload['role']== 'host':
         return Response({'error': 'Only hosts can add fields.'},status.HTTP_401_UNAUTHORIZED)
-    serializer = TerrainSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
+    data = request.data['fields']
+    for fields in data:
+        serializer = TerrainSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
     return JsonResponse(({'message' : 'field created succesfully',
                     'status':200}))
 
 @api_view(['POST'])
 def fieldUpdate(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can update fields.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -171,7 +173,7 @@ def fieldUpdate(request,pk):
 
 @api_view(['DELETE'])
 def fieldDelete(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can delete fields.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -187,7 +189,7 @@ def fieldDelete(request,pk):
 
 @api_view(['GET'])
 def fieldList(request):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can list fields.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -203,7 +205,7 @@ def fieldList(request):
 
 @api_view(['GET'])
 def fieldId(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can get a field.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -228,7 +230,7 @@ def fieldId(request,pk):
 
 @api_view(['GET'])
 def fieldCategoryList(request):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can list field categories.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -244,7 +246,7 @@ def fieldCategoryList(request):
 
 @api_view(['GET'])
 def fieldCategoryId(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can get a field categories.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -262,7 +264,7 @@ def fieldCategoryId(request,pk):
 @api_view(['POST'])
 
 def fieldCategoryCreate(request):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can add field categories.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -271,17 +273,17 @@ def fieldCategoryCreate(request):
         raise AuthenticationFailed('Unauthenticated')
     if not payload['role']== 'host':
         return Response({'error': 'Only hosts can add fields.'},status.HTTP_401_UNAUTHORIZED)
-    serializer = CategoryTerrainSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    else:
-        print(serializer.errors)
+    data = request.data['categories']
+    for category in data:
+        serializer = CategoryTerrainSerializer(data=category)
+        if serializer.is_valid():
+            serializer.save()
     return JsonResponse(({'message' : 'field category created succesfully',
                     'status':200}))
 
 @api_view(['POST'])
 def fieldCategoryUpdate(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can update field Categories.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -299,7 +301,7 @@ def fieldCategoryUpdate(request,pk):
 
 @api_view(['DELETE'])
 def fieldCategoryDelete(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can delete field Categories.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -324,7 +326,7 @@ def fieldCategoryDelete(request,pk):
 
 @api_view(['GET'])
 def photoList(request):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can list picutres.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -340,7 +342,7 @@ def photoList(request):
 
 @api_view(['GET'])
 def photoId(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can get a picture.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -358,7 +360,7 @@ def photoId(request,pk):
 @api_view(['POST'])
 
 def photoCreate(request):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can add picutes.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -375,7 +377,7 @@ def photoCreate(request):
 
 @api_view(['POST'])
 def photoUpdate(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can update picutes.'},status.HTTP_401_UNAUTHORIZED)
     try:
@@ -393,13 +395,13 @@ def photoUpdate(request,pk):
 
 @api_view(['DELETE'])
 def photoDelete(request,pk):
-    token = request.COOKIES.get('jwt')
+    token = request.data['jwt']
     if not token:
         return Response({'error': 'Only hosts can delete pictures.'},status.HTTP_401_UNAUTHORIZED)
     try:
         payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
-        raise AuthenticationFailed('Unauthenticated')
+            return JsonResponse(({'message' : 'Invalid Credentials','status':401}))
     if not payload['role'] == 'host':
         return Response({'error': 'Only hosts can delete pictures.'},status.HTTP_401_UNAUTHORIZED)
     photo = Photo.objects.get(id=pk)

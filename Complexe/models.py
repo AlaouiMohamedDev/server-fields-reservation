@@ -18,12 +18,11 @@ class ComplexeSportif(models.Model):
 class CategoryTerrain(models.Model):
     typeTerrain = models.CharField(max_length=250)
     price = models.FloatField()
-
+    complexeSportif = models.ForeignKey(ComplexeSportif, on_delete=models.CASCADE,default=None)    
 class Terrain(models.Model):
     name = models.CharField(max_length=100,default=None)
     rank = models.IntegerField()
     category = models.ForeignKey(CategoryTerrain, on_delete=models.CASCADE,default=None)
-    complexeSportif = models.ForeignKey(ComplexeSportif, on_delete=models.CASCADE)
 class Photo(models.Model):
     url = models.CharField(max_length=100)
     terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
