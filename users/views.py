@@ -27,9 +27,11 @@ class LoginView(APIView):
         password = request.data['password']
         user = User.objects.filter(email=email).first()
         if user is None:
-            raise AuthenticationFailed('email or password incorrect')
+            return JsonResponse(({'message' : 'Invalid Credentials',
+                    'status':401}))
         if not user.check_password(password):
-            raise AuthenticationFailed('email or password incorrect')
+            return JsonResponse(({'message' : 'Invalid Credentials',
+                    'status':401}))
         payload = {
             'id': user.id,
             'role': user.role,
