@@ -274,10 +274,13 @@ def fieldCategoryCreate(request):
     if not payload['role']== 'host':
         return Response({'error': 'Only hosts can add fields.'},status.HTTP_401_UNAUTHORIZED)
     data = request.data['categories']
+    print (data)
     for category in data:
         serializer = CategoryTerrainSerializer(data=category)
         if serializer.is_valid():
             serializer.save()
+        else:
+            print(serializer.errors)
     return JsonResponse(({'message' : 'field category created succesfully',
                     'status':200}))
 
