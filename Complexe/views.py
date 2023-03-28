@@ -87,11 +87,8 @@ def complexeCreate(request):
     request.data['user'] = user.id
     serializer = ComplexeSportifSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        serializer.save(user=user)
-    else:
-        print(serializer.errors)
-    return JsonResponse(({'message' : 'complexe added successfully',
-                    'status':200}))
+        complexe = serializer.save(user=user)
+    return JsonResponse(({'message' : 'complexe added successfully','status':200, 'complexe_id': complexe.id}))
 
 
 @api_view(['POST'])
