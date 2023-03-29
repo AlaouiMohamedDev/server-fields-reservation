@@ -21,7 +21,7 @@ class CategoryTerrain(models.Model):
     complexeSportif = models.ForeignKey(ComplexeSportif, on_delete=models.CASCADE,default=None)    
 class Terrain(models.Model):
     name = models.CharField(max_length=100,default=None)
-    rank = models.IntegerField()
+    rank = models.IntegerField(null=True, blank=True, default=None)
     category = models.ForeignKey(CategoryTerrain, on_delete=models.CASCADE,default=None)
 class Photo(models.Model):
     url = models.CharField(max_length=100)

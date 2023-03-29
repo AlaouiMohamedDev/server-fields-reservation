@@ -88,6 +88,8 @@ def complexeCreate(request):
     serializer = ComplexeSportifSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         complexe = serializer.save(user=user)
+    else:
+        return JsonResponse(({'message' : 'Invalid Credentials','status':400}))
     return JsonResponse(({'message' : 'complexe added successfully','status':200, 'complexe_id': complexe.id}))
 
 
@@ -109,6 +111,8 @@ def complexeUpdate(request,pk):
     serializer = ComplexeSportifSerializer(instance = complexeSportif,data=request.data,context={'request': request})
     if serializer.is_valid():
         serializer.save(user=user)
+    else:
+        return JsonResponse(({'message' : 'Invalid Credentials','status':400}))
     return JsonResponse(({'message' : 'complexe updated succesfully',
                     'status':200}))
 
@@ -146,10 +150,15 @@ def fieldCreate(request):
     if not payload['role']== 'host':
         return Response({'error': 'Only hosts can add fields.'},status.HTTP_401_UNAUTHORIZED)
     data = request.data['fields']
-    for fields in data:
-        serializer = TerrainSerializer(data=request.data)
+    for field in data:
+        typeTerrain = field['category']
+        category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).first()
+        field['category']= category.id
+        serializer = TerrainSerializer(data=field)
         if serializer.is_valid():
             serializer.save()
+        else:
+            return JsonResponse(({'message' : 'Invalid Credentials','status':400}))
     return JsonResponse(({'message' : 'field created succesfully',
                     'status':200}))
 
@@ -168,6 +177,8 @@ def fieldUpdate(request,pk):
     serializer = TerrainSerializer(instance = terrain,data=request.data)
     if serializer.is_valid():
         serializer.save()
+    else:
+        return JsonResponse(({'message' : 'Invalid Credentials','status':400}))
     return JsonResponse(({'message' : 'field updated succesfully',
                     'status':200}))
 
@@ -280,9 +291,23 @@ def fieldCategoryCreate(request):
         if serializer.is_valid():
             serializer.save()
         else:
-            print(serializer.errors)
+            return JsonResponse(({'message' : 'Invalid Credentials','status':400}))
     return JsonResponse(({'message' : 'field category created succesfully',
                     'status':200}))
+# BetterCode
+# data = request.data['categories']
+# complexe_id = request.data['complexe_id']
+# for category in data:
+#     category['complexe_id'] = complexe_id  # Assign the complexe_id field to the category data
+#     serializer = CategoryTerrainSerializer(data=category)
+#     if serializer.is_valid():
+#         serializer.save()
+#     else:
+#         print(serializer.errors)
+
+# return JsonResponse(({'message' : 'field categories created successfully',
+#                 'status':200})) 
+
 
 @api_view(['POST'])
 def fieldCategoryUpdate(request,pk):
@@ -299,6 +324,8 @@ def fieldCategoryUpdate(request,pk):
     serializer = CategoryTerrainSerializer(instance = categoryTerrain,data=request.data)
     if serializer.is_valid():
         serializer.save()
+    else:
+        return JsonResponse(({'message' : 'Invalid Credentials','status':400}))
     return JsonResponse(({'message' : 'field category updated succesfully',
                     'status':200}))
 
@@ -375,6 +402,8 @@ def photoCreate(request):
     serializer = PhotoSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
+    else:
+        return JsonResponse(({'message' : 'Invalid Credentials','status':400}))
     return JsonResponse(({'message' : 'field picture created succesfully',
                     'status':200}))
 
@@ -393,6 +422,8 @@ def photoUpdate(request,pk):
     serializer = PhotoSerializer(instance = photo,data=request.data)
     if serializer.is_valid():
         serializer.save()
+    else:
+        return JsonResponse(({'message' : 'Invalid Credentials','status':400}))
     return JsonResponse(({'message' : 'field picture updated succesfully',
                     'status':200}))
 
