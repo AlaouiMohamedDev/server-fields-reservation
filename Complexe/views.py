@@ -1,424 +1,52 @@
-from django.shortcuts import render
-from rest_framework.response import Response
-from rest_framework import status
 from django.http import JsonResponse
-from rest_framework.exceptions import AuthenticationFailed
-from .serializers import ComplexeSportifSerializer,TerrainSerializer,CategoryTerrainSerializer,PhotoSerializer
-from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo
-import jwt
+from django.shortcuts import get_object_or_404, render
+from requests import Response
+from .models import ComplexeSportif
+from .serializers import complexSerializer
 from rest_framework.decorators import api_view
-from users.models import User
-# Create your views here.
-@api_view(['GET'])
-def apiOverview(request):
-    api_urls={
-        'List Complexe':'/complexe-list/',
-        'Get Specific Complexe':'/complexe-Id/<str:pk>/',
-        'create Complexe':'/complexe-create/',
-        'update Complexe':'/complexe-update/<str:pk>/',
-        'delete Complexe':'/complexe-delete/<str:pk>/',
-        '__________________________':'__________________________',
-        'List Field':'/field-list/',
-        'Get Specific Field':'/field-Id/<str:pk>/',
-        'create Field':'/field-create/',
-        'update Field':'/field-update/<str:pk>/',
-        'delete Field':'/field-delete/<str:pk>/',
-        '__________________________':'__________________________',
-        'List Field Category':'/fieldCategory-list/',
-        'Get Specific Field Category':'/fieldCategory-Id/<str:pk>/',
-        'create Field Category':'/fieldCategory-create/',
-        'update Field Category':'/fieldCategory-update/<str:pk>/',
-        'delete Field Category':'/fieldCategory-delete/<str:pk>/',
-        '__________________________':'__________________________',
-        'List Photo':'/field-list/',
-        'Get Specific photo':'/field-Id/<str:pk>/',
-        'create Photo':'/photo-create/',
-        'update Photo':'/photo-update/<str:pk>/',
-        'delete Photo':'/photo-delete/<str:pk>/',
-    }
-    return Response(api_urls,  status=status.HTTP_200_OK)
-
-#CRUD for COMPLEXE
-
-@api_view(['GET'])
-def complexeList(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can list complexes','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can list complexes','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can list complexes','status':401}))
-    complexeSportif = ComplexeSportif.objects.all()
-    serializer = ComplexeSportifSerializer(complexeSportif, many=True)
-    return JsonResponse(({'message' : 'complexe listed','status':200}))
-
-@api_view(['GET'])
-def complexeId(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can retrieve complexes','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can retrieve complexes','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can retrieve complexes','status':401}))
-    complexeSportif = ComplexeSportif.objects.get(id=pk)
-    serializer = ComplexeSportifSerializer(complexeSportif, many=False)
-    return JsonResponse((serializer,{'message' : 'complexe retrieved','status':200}))
-
-@api_view(['POST'])
-def complexeCreate(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can add complexes','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can add complexes','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can add complexes','status':401}))
-    user = User.objects.get(id=payload['id'])
-    request.data['user'] = user.id
-    serializer = ComplexeSportifSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        complexe = serializer.save(user=user)
-    else:
-        return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'complexe added successfully','status':200, 'complexe_id': complexe.id}))
+from rest_framework import status
 
 
 @api_view(['POST'])
-def complexeUpdate(request,pk):
-    user = request.user
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can update complexes','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can update complexes','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can update complexes','status':401}))
-    complexeSportif = ComplexeSportif.objects.get(id=pk)
-    user = User.objects.get(id=payload['id'])
-    request.data['user'] = user.id
-    serializer = ComplexeSportifSerializer(instance = complexeSportif,data=request.data,context={'request': request})
-    if serializer.is_valid():
-        serializer.save(user=user)
-    else:
-        return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'complexe updated succesfully','status':200}))
+def complexCreate(request):
+   serializer = complexSerializer(data=request.data)
+   if serializer.is_valid():
+       serializer.save()
+   return JsonResponse(serializer.data, safe=False)
 
 @api_view(['DELETE'])
-def complexeDelete(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can delete complexes','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can delete complexes','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can delete complexes','status':401}))
-    complexeSportif = ComplexeSportif.objects.get(id=pk)
-    complexeSportif.delete()
-    return JsonResponse(({'message' : 'complexe deleted succesfully','status':200}))
-
-
-#CRUD for fields 
-
-
+def complexDelete(request,pk):
+   complexes = ComplexeSportif.objects.get(id=pk)
+   complexes.delete()
+   return JsonResponse('Item is deleted', safe=False)
 
 @api_view(['POST'])
-
-def fieldCreate(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can add fields','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can add fields','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can add fields','status':401}))
-    data = request.data['fields']
-    for field in data:
-        typeTerrain = field['category']
-        category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).first()
-        field['category']= category.id
-        serializer = TerrainSerializer(data=field)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'field created succesfully','status':200}))
-
-@api_view(['POST'])
-def fieldUpdate(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can update fields','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can update fields','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can update fields','status':401}))
-    terrain = Terrain.objects.get(id=pk)
-    serializer = TerrainSerializer(instance = terrain,data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    else:
-        return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'field updated succesfully','status':200}))
-
-@api_view(['DELETE'])
-def fieldDelete(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can delete fields','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can delete fields','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can delete fields','status':401}))
-    terrain = Terrain.objects.get(id=pk)
-    terrain.delete()
-    return JsonResponse(({'message' : 'field deleted succesfully','status':200}))
+def complexUpdate(request,pk):
+   complexes = ComplexeSportif.objects.get(id=pk)
+   serializer = complexSerializer(instance=complexes,data=request.data)
+   if serializer.is_valid():
+       serializer.save()
+   return JsonResponse(serializer.data, safe=False)
 
 @api_view(['GET'])
-def fieldList(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can list fields','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can list fields','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can list fields','status':401}))
-    terrain = Terrain.objects.all()
-    serializer = TerrainSerializer(terrain, many=True)
-    return JsonResponse(({'message' : 'field listed succesfully','status':200}))
-
-@api_view(['GET'])
-def fieldId(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can retrieve fields','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can retrieve fields','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can retrieve fields','status':401}))
-    terrain = Terrain.objects.get(id=pk)
-    serializer = TerrainSerializer(terrain, many=False)
-    return JsonResponse((serializer,{'message' : 'field retrieved succesfully','status':200}))
+def complexDetails(request, pk):
+    complexes = ComplexeSportif.objects.get(id=pk)
+    serializer = complexSerializer(complexes,many=False)
+    return JsonResponse(serializer.data, safe=False)
+   
 
 
 
 
 
-#CRUD for fieldCategory
 
 
-
-
-@api_view(['GET'])
-def fieldCategoryList(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can list categories','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can list categories','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can list categories','status':401}))
-    categoryTerrain = CategoryTerrain.objects.all()
-    serializer = CategoryTerrainSerializer(categoryTerrain, many=True)
-    return JsonResponse((serializer,{'message' : 'field categories listed succesfully','status':200}))
-
-@api_view(['GET'])
-def fieldCategoryId(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can retrieve categories','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can retrieve categories','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can retrieve categories','status':401}))
-    categoryterrain = CategoryTerrain.objects.get(id=pk)
-    serializer = CategoryTerrainSerializer(categoryterrain, many=False)
-    return JsonResponse((serializer,{'message' : 'field category retrieved succesfully','status':200}))
-
-
-@api_view(['POST'])
-
-def fieldCategoryCreate(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can add categories','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can add categories','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can add categories','status':401}))
-    data = request.data['categories']
-    for category in data:
-        serializer = CategoryTerrainSerializer(data=category)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'field category created succesfully','status':200}))
-# BetterCode
-# data = request.data['categories']
-# complexe_id = request.data['complexe_id']
-# for category in data:
-#     category['complexe_id'] = complexe_id  # Assign the complexe_id field to the category data
-#     serializer = CategoryTerrainSerializer(data=category)
-#     if serializer.is_valid():
-#         serializer.save()
-#     else:
-#         print(serializer.errors)
-
-# return JsonResponse(({'message' : 'field categories created successfully',
-#                 'status':200})) 
-
-
-@api_view(['POST'])
-def fieldCategoryUpdate(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can update categories','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can update categories','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can update categories','status':401}))
-    categoryTerrain = CategoryTerrain.objects.get(id=pk)
-    serializer = CategoryTerrainSerializer(instance = categoryTerrain,data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    else:
-        return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'field category updated succesfully','status':200}))
-
-@api_view(['DELETE'])
-def fieldCategoryDelete(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can delete categories','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can delete categories','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can delete categories','status':401}))
-    categoryterrain = CategoryTerrain.objects.get(id=pk)
-    categoryterrain.delete()
-    return JsonResponse(({'message' : 'field category deleted succesfully','status':200}))
+       
 
 
 
 
 
-#CRUD for Photo
 
 
 
-
-@api_view(['GET'])
-def photoList(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can retrieve photos','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can retrieve photos','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can retrieve photos','status':401}))
-    photo = Photo.objects.all()
-    serializer =PhotoSerializer(photo, many=True)
-    return JsonResponse((serializer,{'message' : 'field pictures retrieved succesfully','status':200}))
-
-@api_view(['GET'])
-def photoId(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can get photos','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can get photos','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can get photos','status':401}))
-    photo = Photo.objects.get(id=pk)
-    serializer = PhotoSerializer(photo, many=False)
-    return JsonResponse((serializer,{'message' : 'field picture retrieved succesfully','status':200}))
-
-
-@api_view(['POST'])
-
-def photoCreate(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
-    serializer = PhotoSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    else:
-        return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'field picture created succesfully','status':200}))
-
-@api_view(['POST'])
-def photoUpdate(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can update photos','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can update photos','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can update photos','status':401}))
-    photo = Photo.objects.get(id=pk)
-    serializer = PhotoSerializer(instance = photo,data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    else:
-        return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'field picture updated succesfully','status':200}))
-
-@api_view(['DELETE'])
-def photoDelete(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can delete Photos','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can delete photos','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can delete photos','status':401}))
-    photo = Photo.objects.get(id=pk)
-    photo.delete()
-    return JsonResponse(({'message' : 'field picture deleted succesfully','status':200}))
