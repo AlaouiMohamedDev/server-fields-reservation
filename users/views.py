@@ -44,7 +44,7 @@ class LoginView(APIView):
         response.data = {
             'jwt': token
         }
-        return JsonResponse(({'jwt': token,'message' : 'login successfully',
+        return JsonResponse(({'jwt': token,'message' : 'logged in successfully',
                     'status':200}))
 
 
@@ -69,7 +69,4 @@ class LogoutView(APIView):
         response.delete_cookie('jwt')
         response.data={
             'message':'Logged out Succesfully','status':200}
-        return response
-    
-
-    
+        return response  

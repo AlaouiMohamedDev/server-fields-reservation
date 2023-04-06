@@ -9,12 +9,12 @@ class Zone(models.Model):
 class ComplexeSportif(models.Model):
     name= models.CharField(max_length=100)
     adresse = models.CharField(max_length=250)
-    lattitude = models.DecimalField(max_digits = 22,decimal_places = 20)
-    longtitude = models.DecimalField(max_digits = 22,decimal_places = 20)
+    lattitude = models.DecimalField(max_digits = 30,decimal_places = 20)
+    longtitude = models.DecimalField(max_digits = 30,decimal_places = 20)
     description = models.CharField(max_length=250,default=None)
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
-    url = models.CharField(max_length=250, null=True)    
+    url = models.CharField(max_length=250,blank=True, null=True)    
     
 class CategoryTerrain(models.Model):
     typeTerrain = models.CharField(max_length=250)

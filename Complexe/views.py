@@ -221,7 +221,7 @@ def fieldList(request):
         serialized_data = serializer.data
         serialized_data['terrain_photos'] = photo_serializer.data
         data.append({'terrain': serialized_data})
-    return JsonResponse({'data': data, 'message': 'field listed successfully', 'status': 200})
+    return JsonResponse({'data': data, 'message': 'fields listed successfully', 'status': 200})
 
 
 
@@ -267,7 +267,7 @@ def fieldCategoryId(request,pk):
     serializer = CategoryTerrainSerializer(categoryterrain, many=False)
     data = {
         'data': serializer.data,
-        'message': 'field categories listed successfully',
+        'message': 'field category listed successfully',
         'status': 200
     }
     return JsonResponse(data)
@@ -354,7 +354,7 @@ def photoList(request):
     serializer =PhotoSerializer(photo, many=True)
     data = {
         'data': serializer.data,
-        'message': 'field categories listed successfully',
+        'message': 'photos listed successfully',
         'status': 200
     }
     return JsonResponse(data)
@@ -363,7 +363,7 @@ def photoList(request):
 def photoId(request,pk):
     data = {
         'data': serializer.data,
-        'message': 'field categories listed successfully',
+        'message': 'photo listed successfully',
         'status': 200
     }
     photo = Photo.objects.get(id=pk)
