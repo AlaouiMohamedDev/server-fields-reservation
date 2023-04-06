@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  server-fields-reservation:
+    build: .
+    image: kritirank.azurecr.io/server-fields-reservation ##Replace <your-acr-login-server> with your Azure Container Registry login server.
+    ports:
+      - "8000:8000"

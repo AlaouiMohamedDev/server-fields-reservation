@@ -14,14 +14,13 @@ class ComplexeSportif(models.Model):
     description = models.CharField(max_length=250,default=None)
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
-    url = models.CharField(max_length=250, null=True)
+    url = models.CharField(max_length=250, null=True)    
     
-
 class CategoryTerrain(models.Model):
     typeTerrain = models.CharField(max_length=250)
     price = models.FloatField()
     area = models.IntegerField(blank=True, null=True)
-    complexeSportif = models.ForeignKey(ComplexeSportif, on_delete=models.CASCADE,default=None)    
+    complexeSportif = models.ForeignKey(ComplexeSportif, on_delete=models.CASCADE,default=None)  
 class Terrain(models.Model):
     name = models.CharField(max_length=100,default=None)
     rank = models.IntegerField(null=True, blank=True, default=None)
@@ -29,5 +28,5 @@ class Terrain(models.Model):
     is_reserved = models.BooleanField(default=False)
     category = models.ForeignKey(CategoryTerrain, on_delete=models.CASCADE,default=None)
 class Photo(models.Model):
-    url = models.CharField(max_length=100)
+    url = models.CharField(max_length=250)
     terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)

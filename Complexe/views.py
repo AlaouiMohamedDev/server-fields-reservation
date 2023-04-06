@@ -30,8 +30,8 @@ def apiOverview(request):
         'update Field Category':'/fieldCategory-update/<str:pk>/',
         'delete Field Category':'/fieldCategory-delete/<str:pk>/',
         '__________________________':'__________________________',
-        'List Photo':'/field-list/',
-        'Get Specific photo':'/field-Id/<str:pk>/',
+        'List Photo':'/photo-list/',
+        'Get Specific photo':'/photo-Id/<str:pk>/',
         'create Photo':'/photo-create/',
         'update Photo':'/photo-update/<str:pk>/',
         'delete Photo':'/photo-delete/<str:pk>/',
@@ -42,33 +42,25 @@ def apiOverview(request):
 
 @api_view(['GET'])
 def complexeList(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can list complexes','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can list complexes','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can list complexes','status':401}))
     complexeSportif = ComplexeSportif.objects.all()
     serializer = ComplexeSportifSerializer(complexeSportif, many=True)
-    return JsonResponse(({'message' : 'complexe listed','status':200}))
+    data = {
+        'data': serializer.data,
+        'message': 'complexe listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
 
 @api_view(['GET'])
 def complexeId(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can retrieve complexes','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can retrieve complexes','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can retrieve complexes','status':401}))
     complexeSportif = ComplexeSportif.objects.get(id=pk)
     serializer = ComplexeSportifSerializer(complexeSportif, many=False)
-    return JsonResponse((serializer,{'message' : 'complexe retrieved','status':200}))
+    data = {
+        'data': serializer.data,
+        'message': 'complexe listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
 
 @api_view(['POST'])
 def complexeCreate(request):
@@ -220,33 +212,34 @@ def fieldDelete(request,pk):
 
 @api_view(['GET'])
 def fieldList(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can list fields','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can list fields','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can list fields','status':401}))
     terrain = Terrain.objects.all()
-    serializer = TerrainSerializer(terrain, many=True)
-    return JsonResponse(({'message' : 'field listed succesfully','status':200}))
+    data = []
+    for t in terrain:
+        serializer = TerrainSerializer(t)
+        photos = Photo.objects.filter(terrain=t)
+        photo_serializer = PhotoSerializer(photos, many=True)
+        serialized_data = serializer.data
+        serialized_data['terrain_photos'] = photo_serializer.data
+        data.append({'terrain': serialized_data})
+    return JsonResponse({'data': data, 'message': 'field listed successfully', 'status': 200})
+
+
 
 @api_view(['GET'])
-def fieldId(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can retrieve fields','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can retrieve fields','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can retrieve fields','status':401}))
+def fieldId(request, pk):
     terrain = Terrain.objects.get(id=pk)
     serializer = TerrainSerializer(terrain, many=False)
-    return JsonResponse((serializer,{'message' : 'field retrieved succesfully','status':200}))
+    photos = Photo.objects.filter(terrain=terrain)
+    photo_serializer = PhotoSerializer(photos, many=True)
+    serialized_data = serializer.data
+    serialized_data['terrain_photos'] = photo_serializer.data
+    data = {
+        'data': serialized_data,
+        'message': 'field listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
+
 
 
 
@@ -259,33 +252,25 @@ def fieldId(request,pk):
 
 @api_view(['GET'])
 def fieldCategoryList(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can list categories','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can list categories','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can list categories','status':401}))
     categoryTerrain = CategoryTerrain.objects.all()
     serializer = CategoryTerrainSerializer(categoryTerrain, many=True)
-    return JsonResponse((serializer,{'message' : 'field categories listed succesfully','status':200}))
+    data = {
+        'data': serializer.data,
+        'message': 'field categories listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
 
 @api_view(['GET'])
 def fieldCategoryId(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can retrieve categories','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can retrieve categories','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can retrieve categories','status':401}))
     categoryterrain = CategoryTerrain.objects.get(id=pk)
     serializer = CategoryTerrainSerializer(categoryterrain, many=False)
-    return JsonResponse((serializer,{'message' : 'field category retrieved succesfully','status':200}))
+    data = {
+        'data': serializer.data,
+        'message': 'field categories listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
 
 
 @api_view(['POST'])
@@ -359,42 +344,31 @@ def fieldCategoryDelete(request,pk):
 
 
 
-
-
 #CRUD for Photo
-
 
 
 
 @api_view(['GET'])
 def photoList(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can retrieve photos','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can retrieve photos','status':401}))
-    if not payload['role'] == 'host':
-        return JsonResponse(({'message' : 'Only hosts can retrieve photos','status':401}))
     photo = Photo.objects.all()
     serializer =PhotoSerializer(photo, many=True)
-    return JsonResponse((serializer,{'message' : 'field pictures retrieved succesfully','status':200}))
+    data = {
+        'data': serializer.data,
+        'message': 'field categories listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
 
 @api_view(['GET'])
 def photoId(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Only hosts can get photos','status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Only hosts can get photos','status':401}))
-    if not payload['role']== 'host':
-        return JsonResponse(({'message' : 'Only hosts can get photos','status':401}))
+    data = {
+        'data': serializer.data,
+        'message': 'field categories listed successfully',
+        'status': 200
+    }
     photo = Photo.objects.get(id=pk)
     serializer = PhotoSerializer(photo, many=False)
-    return JsonResponse((serializer,{'message' : 'field picture retrieved succesfully','status':200}))
+    return JsonResponse(data)
 
 
 @api_view(['POST'])
