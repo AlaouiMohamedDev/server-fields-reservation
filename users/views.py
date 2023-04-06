@@ -15,10 +15,14 @@ from rest_framework import status
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return JsonResponse(({'message' : 'registered successfully',
-                    'status':200}))
+        if serializer.is_valid() :
+            serializer.save()
+            return JsonResponse(({'message' : 'registered successfully',
+                        'status':200}))
+        else:
+            return JsonResponse(({'message' : 'Invalid Credentials',
+                    'status':401}))
+            
 
 
 class LoginView(APIView):
@@ -42,10 +46,22 @@ class LoginView(APIView):
         response = Response()
         response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {
-            'jwt': token
+            'jwt': token,
+             'user': {
+                'id': user.id,
+                'email': user.email,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'role': user.role
+            },
+            'message' : 'login successfully',
+            'status':200
         }
+
         return JsonResponse(({'jwt': token,'message' : 'logged in successfully',
                     'status':200}))
+
 
 
 class UserView(APIView):
