@@ -21,10 +21,13 @@ class User(AbstractUser):
     email=models.CharField(max_length=255,unique=True)
     password=models.CharField(max_length=255)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=CLIENT)
-    username=models.CharField(max_length=50,default=None)
+    username=None
     is_active = models.BooleanField(default=True)
+    is_staff=None
+    is_superuser=None
+    last_login=None
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = [first_name,last_name]
 """
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):

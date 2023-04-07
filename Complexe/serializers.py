@@ -15,7 +15,7 @@ class ComplexeSportifSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
         model = ComplexeSportif
-        fields = ['id', 'name', 'adresse','description','lattitude', 'longtitude', 'zone', 'user']
+        fields = ['id', 'name', 'adresse','description','lattitude', 'longtitude', 'zone', 'user','url']
         read_only_fields = ['id']
 
 class CategoryTerrainSerializer(serializers.ModelSerializer):

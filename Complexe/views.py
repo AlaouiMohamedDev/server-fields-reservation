@@ -75,6 +75,7 @@ def complexeCreate(request):
         return JsonResponse(({'message' : 'Only hosts can add complexes','status':401}))
     user = User.objects.get(id=payload['id'])
     request.data['user'] = user.id
+    print(request.data)
     serializer = ComplexeSportifSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         complexe = serializer.save(user=user)
@@ -130,8 +131,9 @@ def list_fields(request):
     data = []
     for terrain in terrains:
         terrain_data = {}
-        terrain_data['Field name'] = terrain.name
-        terrain_data['Complexe name'] = terrain.category.complexeSportif.name
+        terrain_data['Fieldname'] = terrain.name
+        terrain_data['Complexename'] = terrain.category.complexeSportif.name
+        terrain_data['address'] = terrain.category.complexeSportif.adresse
         terrain_data['price'] = terrain.category.price
         terrain_data['number_of_players'] = terrain.number_of_players
         terrain_data['reserved'] = terrain.is_reserved
@@ -149,6 +151,8 @@ def list_fields(request):
     return Response(data)
 
 
+
+
 #############################################
 
 
@@ -164,16 +168,22 @@ def fieldCreate(request):
         return JsonResponse(({'message' : 'Only hosts can add fields','status':401}))
     if not payload['role']== 'host':
         return JsonResponse(({'message' : 'Only hosts can add fields','status':401}))
-    data = request.data['fields']
-    for field in data:
-        typeTerrain = field['category']
-        category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).first()
-        field['category']= category.id
-        serializer = TerrainSerializer(data=field)
-        if serializer.is_valid():
-            serializer.save()
+    data = request.data['field']
+    typeTerrain = data['category']
+    category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).first()
+    data['category']= category.id
+    serializer = TerrainSerializer(data=data)
+    if serializer.is_valid():
+        terrain = serializer.save()
+        photo_data = {'url': request.data['field']['url'], 'terrain': terrain.id}
+        photo_serializer = PhotoSerializer(data=photo_data)
+        if photo_serializer.is_valid():
+            photo_serializer.save()
         else:
-            return JsonResponse(({'message' : 'Invalid Data','status':400}))
+            terrain.delete()
+            return JsonResponse(({'message': 'Invalid photo data', 'status': 400}))
+    else:
+        return JsonResponse(({'message' : 'Invalid Data','status':400}))
     return JsonResponse(({'message' : 'field created succesfully','status':200}))
 
 @api_view(['POST'])
@@ -221,7 +231,7 @@ def fieldList(request):
         serialized_data = serializer.data
         serialized_data['terrain_photos'] = photo_serializer.data
         data.append({'terrain': serialized_data})
-    return JsonResponse({'data': data, 'message': 'fields listed successfully', 'status': 200})
+    return JsonResponse({'data': data, 'message': 'field listed successfully', 'status': 200})
 
 
 
@@ -267,7 +277,7 @@ def fieldCategoryId(request,pk):
     serializer = CategoryTerrainSerializer(categoryterrain, many=False)
     data = {
         'data': serializer.data,
-        'message': 'field category listed successfully',
+        'message': 'field categories listed successfully',
         'status': 200
     }
     return JsonResponse(data)
@@ -354,7 +364,7 @@ def photoList(request):
     serializer =PhotoSerializer(photo, many=True)
     data = {
         'data': serializer.data,
-        'message': 'photos listed successfully',
+        'message': 'field categories listed successfully',
         'status': 200
     }
     return JsonResponse(data)
@@ -363,7 +373,7 @@ def photoList(request):
 def photoId(request,pk):
     data = {
         'data': serializer.data,
-        'message': 'photo listed successfully',
+        'message': 'field categories listed successfully',
         'status': 200
     }
     photo = Photo.objects.get(id=pk)
