@@ -25,7 +25,7 @@ class Terrain(models.Model):
     name = models.CharField(max_length=100,default=None)
     rank = models.IntegerField(null=True, blank=True, default=None)
     number_of_players = models.IntegerField(blank=True, null=True)
-    is_reserved = models.BooleanField(default=False)
+    is_reserved = models.BooleanField(default=False,blank=True,null=True)
     category = models.ForeignKey(CategoryTerrain, on_delete=models.CASCADE,default=None)
 class Photo(models.Model):
     url = models.CharField(max_length=250)

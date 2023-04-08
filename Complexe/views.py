@@ -170,13 +170,16 @@ def fieldCreate(request):
         return JsonResponse(({'message' : 'Only hosts can add fields','status':401}))
     data = request.data['fields']
     for field in data:
-        typeTerrain = data['category']
+        typeTerrain = field['category']
         category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).first()
         field['category']= category.id
+        url = field['url']
+        del field['url']
+        print(field)
         serializer = TerrainSerializer(data=field)
         if serializer.is_valid():
             terrain = serializer.save()
-            photo_data = {'url': request.data['fields']['url'], 'terrain': terrain.id}
+            photo_data = {'url': url, 'terrain': terrain.id}
             photo_serializer = PhotoSerializer(data=photo_data)
             if photo_serializer.is_valid():
                 photo_serializer.save()
@@ -184,7 +187,7 @@ def fieldCreate(request):
                 terrain.delete()
                 return JsonResponse(({'message': 'Invalid photo data', 'status': 400}))
         else:
-            return JsonResponse(({'message' : 'Invalid Terrain Data','status':400}))
+            return serializer.errors
     return JsonResponse(({'message' : 'field created succesfully','status':200}))
 
 @api_view(['POST'])
