@@ -66,14 +66,20 @@ def reservationId(request,pk):
         'status': 200
     }
     return JsonResponse(data)
+
 @api_view(['POST'])
 def reservationCreate(request):
-    serializer = ReservationSerializer(data=request.data)
+    token = request.data['jwt']
+    payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    user = User.objects.get(id=payload['id'])
+    request.data['user'] = user.id
+    serializer = ReservationSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(user=user)
     else:
-        return JsonResponse(({'message' : 'Invalid Data','status':400}))
+        return JsonResponse(({'message' : 'You cant book a field right now','status':400}))
     return JsonResponse(({'message' : 'reservation added successfully','status':200}))
+
 #CRUD for COMPLEXE
 
 @api_view(['GET'])
