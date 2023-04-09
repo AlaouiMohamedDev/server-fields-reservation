@@ -55,8 +55,12 @@ def reservationList(request):
             'from': reservation.startTime,
             'to': reservation.endTime,
             'name': reservation.user.first_name,
+            'userId': reservation.user.id,
             'terrain': terrain_photo_url,
-            'complexe': reservation.terrain.category.complexeSportif.url
+            'complexe': reservation.terrain.category.complexeSportif.url,
+            'address': reservation.terrain.category.complexeSportif.adresse,
+            'price': reservation.terrain.category.price,
+            'nameField': reservation.terrain.name
         }
         data.append(reservation)
     return JsonResponse(data, safe=False)
