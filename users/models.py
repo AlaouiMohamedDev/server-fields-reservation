@@ -43,5 +43,5 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         "noreply@somehost.local",
         # to:
         [reset_password_token.user.email]
-    )"""
+)"""
     
