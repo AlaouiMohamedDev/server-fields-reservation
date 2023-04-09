@@ -49,6 +49,7 @@ def reservationList(request):
         day_name = reservation.date.strftime('%A')
         terrain_photo_url = reservation.terrain.photo_set.first().url
         reservation = {
+            'id':reservation.id,
             'idField':reservation.terrain.id,
             'date': reservation.date,
             'day': day_name,
