@@ -40,11 +40,12 @@ def apiOverview(request):
 @api_view(['GET'])
 def reservationList(request):
     reservations = Reservation.objects.all()
-    date = []
+    data = []
     for reservation in reservations:
         day_name = reservation.date.strftime('%A')
         terrain_photo_url = reservation.terrain.photo_set.first().url
-        data = {
+        reservation = {
+            'idField':reservation.terrain.id,
             'date': reservation.date,
             'day': day_name,
             'from': reservation.startTime,
@@ -53,6 +54,7 @@ def reservationList(request):
             'terrain': terrain_photo_url,
             'complexe': reservation.terrain.category.complexeSportif.url
         }
+        data.append(reservation)
     return JsonResponse(data, safe=False)
 @api_view(['GET'])
 def reservationId(request,pk):

@@ -31,9 +31,9 @@ class Photo(models.Model):
     url = models.CharField(max_length=250)
     terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
 class Reservation(models.Model):
-    date = models.DateTimeField()
-    startTime = models.TimeField()
-    endTime = models.TimeField()
+    date = models.DateField()
+    startTime = models.CharField(max_length=100,default=None)
+    endTime = models.CharField(max_length=100,default=None)
     terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     # is_confirmed = models.BooleanField(default=False)
