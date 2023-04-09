@@ -34,6 +34,10 @@ def apiOverview(request):
         'create Photo':'/photo-create/',
         'update Photo':'/photo-update/<str:pk>/',
         'delete Photo':'/photo-delete/<str:pk>/',
+        '__________________________':'__________________________',
+        'List Reservation':'/reservation-list/',
+        'Get Specific Reservation':'/reservation-Id/<str:pk>/',
+        'create Reservation':'/reservation-create/',
     }
     return Response(api_urls,  status=status.HTTP_200_OK)
 #Crud for Reservations

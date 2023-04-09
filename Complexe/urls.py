@@ -25,5 +25,7 @@ urlpatterns = [
     path('photo-update/<str:pk>/', views.photoUpdate, name='photo-update'),
     path('photo-delete/<str:pk>/', views.photoDelete, name='photo-delete'),
     path('reservation-list/', views.reservationList, name='reservation-list'),
+    path('reservation-Id/<str:pk>/', views.reservationId, name='reservation-Id'),
+    path('reservation-create/', views.reservationCreate, name='reservation-create'),
     path('list_fields/', views.list_fields, name='list_fields'),
     ]
