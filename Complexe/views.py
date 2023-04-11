@@ -173,7 +173,35 @@ def complexeDelete(request,pk):
     return JsonResponse(({'message' : 'complexe deleted succesfully','status':200}))
 
 
+@api_view(['GET'])
+def complexe_sportif_utilisateur(request, utilisateur_id):
+    complexes = ComplexeSportif.objects.filter(user=utilisateur_id)
+    data = []
+    for complexe in complexes:
+        complexe_data = {
+            'name': complexe.name,
+            'adresse': complexe.adresse,
+            'lattitude': complexe.lattitude,
+            'longtitude': complexe.longtitude,
+            'description': complexe.description,
+            'zone': complexe.zone.id,
+            'user': complexe.user.id,
+            'url': complexe.url
+        }
+        data.append(complexe_data)
+    return Response(data)
+
 #CRUD for fields 
+
+@api_view(['GET'])
+def complex_terrains(request, complex_id):
+    try:
+        complexe = ComplexeSportif.objects.get(id=complex_id)
+        terrains = Terrain.objects.filter(category__complexeSportif=complexe)
+        serialized_data = TerrainSerializer(terrains, many=True).data
+        return Response(serialized_data, status=status.HTTP_200_OK)
+    except ComplexeSportif.DoesNotExist:
+        return Response("Complexe sportif non trouvé", status=status.HTTP_404_NOT_FOUND)
 
 # retourner fields #########################
 @api_view(['GET'])
