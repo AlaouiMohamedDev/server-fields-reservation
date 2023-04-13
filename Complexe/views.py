@@ -269,13 +269,13 @@ def fieldCreate(request):
         return JsonResponse(({'message' : 'Only hosts can add fields','status':401}))
     data = request.data['fields']
     for field in data:
-        typeTerrain = data['category']
+        typeTerrain = field['category']
         category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).first()
         field['category']= category.id
         serializer = TerrainSerializer(data=field)
         if serializer.is_valid():
             terrain = serializer.save()
-            photo_data = {'url': request.data['fields']['url'], 'terrain': terrain.id}
+            photo_data = {'url': field['url'], 'terrain': terrain.id}
             photo_serializer = PhotoSerializer(data=photo_data)
             if photo_serializer.is_valid():
                 photo_serializer.save()
