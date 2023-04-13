@@ -179,6 +179,7 @@ def complexe_sportif_utilisateur(request, utilisateur_id):
     data = []
     for complexe in complexes:
         complexe_data = {
+            'id': complexe.id,
             'name': complexe.name,
             'adresse': complexe.adresse,
             'lattitude': complexe.lattitude,
@@ -195,13 +196,31 @@ def complexe_sportif_utilisateur(request, utilisateur_id):
 
 @api_view(['GET'])
 def complex_terrains(request, complex_id):
-    try:
-        complexe = ComplexeSportif.objects.get(id=complex_id)
-        terrains = Terrain.objects.filter(category__complexeSportif=complexe)
-        serialized_data = TerrainSerializer(terrains, many=True).data
-        return Response(serialized_data, status=status.HTTP_200_OK)
-    except ComplexeSportif.DoesNotExist:
-        return Response("Complexe sportif non trouvé", status=status.HTTP_404_NOT_FOUND)
+
+    complexe = ComplexeSportif.objects.get(id=complex_id)
+    terrains = Terrain.objects.filter(category__complexeSportif=complexe)
+
+    data = []
+    for terrain in terrains:
+        terrain_data = {}
+        terrain_data['id'] = terrain.id
+        terrain_data['Fieldname'] = terrain.name
+        terrain_data['Complexename'] = terrain.category.complexeSportif.name
+        terrain_data['address'] = terrain.category.complexeSportif.adresse
+        terrain_data['price'] = terrain.category.price
+        terrain_data['number_of_players'] = terrain.number_of_players
+        terrain_data['reserved'] = terrain.is_reserved
+        terrain_data['area'] = terrain.category.area
+        terrain_data['complex_photo']= terrain.category.complexeSportif.url
+
+        # Photo du terrain
+        terrain_photo = terrain.photo_set.first()
+        if terrain_photo:
+            terrain_data['terrain_photo'] = terrain_photo.url
+
+        data.append(terrain_data)
+
+    return Response(data)
 
 # retourner fields #########################
 @api_view(['GET'])
