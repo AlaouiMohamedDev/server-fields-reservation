@@ -270,7 +270,7 @@ def fieldCreate(request):
     data = request.data['fields']
     for field in data:
         typeTerrain = field['category']
-        category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).first()
+        category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).last()
         field['category']= category.id
         serializer = TerrainSerializer(data=field)
         if serializer.is_valid():
