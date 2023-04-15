@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from .views import *
 
 urlpatterns = [
     path('', views.apiOverview, name = 'api-overview'),
@@ -24,5 +25,10 @@ urlpatterns = [
     path('photo-create/', views.photoCreate, name='photo-create'),
     path('photo-update/<str:pk>/', views.photoUpdate, name='photo-update'),
     path('photo-delete/<str:pk>/', views.photoDelete, name='photo-delete'),
+    path('reservation-list/', views.reservationList, name='reservation-list'),
+    path('reservation-Id/<str:pk>/', views.reservationId, name='reservation-Id'),
+    path('reservation-create/', views.reservationCreate, name='reservation-create'),
     path('list_fields/', views.list_fields, name='list_fields'),
+    path('complexes/<int:complex_id>/terrains/', complex_terrains, name='complex-terrains'),
+    path('utilisateur/<int:utilisateur_id>/complexes-sportifs/', complexe_sportif_utilisateur),
     ]

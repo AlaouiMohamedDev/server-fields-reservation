@@ -9,12 +9,12 @@ class Zone(models.Model):
 class ComplexeSportif(models.Model):
     name= models.CharField(max_length=100)
     adresse = models.CharField(max_length=250)
-    lattitude = models.DecimalField(max_digits = 30,decimal_places = 20)
-    longtitude = models.DecimalField(max_digits = 30,decimal_places = 20)
+    lattitude = models.DecimalField(max_digits = 22,decimal_places = 20)
+    longtitude = models.DecimalField(max_digits = 22,decimal_places = 20)
     description = models.CharField(max_length=250,default=None)
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
-    url = models.CharField(max_length=250,blank=True, null=True)    
+    url = models.CharField(max_length=250, null=True)    
     
 class CategoryTerrain(models.Model):
     typeTerrain = models.CharField(max_length=250)
@@ -30,3 +30,20 @@ class Terrain(models.Model):
 class Photo(models.Model):
     url = models.CharField(max_length=250)
     terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
+class Reservation(models.Model):
+    date = models.DateField()
+    startTime = models.CharField(max_length=100,default=None)
+    endTime = models.CharField(max_length=100,default=None)
+    terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # is_confirmed = models.BooleanField(default=False)
+    # is_canceled = models.BooleanField(default=False)
+    # is_done = models.BooleanField(default=False)
+    # is_paid = models.BooleanField(default=False)
+    # is_refused = models.BooleanField(default=False)
+    # is_waiting = models.BooleanField(default=False)
+    # is_rejected = models.BooleanField(default=False)
+    # is_accepted = models.BooleanField(default=False)
+    # is_expired = models.BooleanField(default=False)
+    # is_canceled_by_complex = models.BooleanField(default=False)
+    # is_canceled_by_user = models.BooleanField(default=False)

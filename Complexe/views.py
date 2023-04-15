@@ -2,9 +2,8 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
-from rest_framework.exceptions import AuthenticationFailed
-from .serializers import ComplexeSportifSerializer,TerrainSerializer,CategoryTerrainSerializer,PhotoSerializer
-from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo
+from .serializers import ComplexeSportifSerializer,TerrainSerializer,CategoryTerrainSerializer,PhotoSerializer,ReservationSerializer
+from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo,Reservation
 import jwt
 from rest_framework.decorators import api_view
 from users.models import User
@@ -35,8 +34,60 @@ def apiOverview(request):
         'create Photo':'/photo-create/',
         'update Photo':'/photo-update/<str:pk>/',
         'delete Photo':'/photo-delete/<str:pk>/',
+        '__________________________':'__________________________',
+        'List Reservation':'/reservation-list/',
+        'Get Specific Reservation':'/reservation-Id/<str:pk>/',
+        'create Reservation':'/reservation-create/',
     }
     return Response(api_urls,  status=status.HTTP_200_OK)
+#Crud for Reservations
+@api_view(['GET'])
+def reservationList(request):
+    reservations = Reservation.objects.all()
+    data = []
+    for reservation in reservations:
+        day_name = reservation.date.strftime('%A')
+        terrain_photo_url = reservation.terrain.photo_set.first().url
+        reservation = {
+            'id':reservation.id,
+            'idField':reservation.terrain.id,
+            'date': reservation.date,
+            'day': day_name,
+            'from': reservation.startTime,
+            'to': reservation.endTime,
+            'name': reservation.user.first_name,
+            'userId': reservation.user.id,
+            'terrain': terrain_photo_url,
+            'complexe': reservation.terrain.category.complexeSportif.url,
+            'address': reservation.terrain.category.complexeSportif.adresse,
+            'price': reservation.terrain.category.price,
+            'nameField': reservation.terrain.name
+        }
+        data.append(reservation)
+    return JsonResponse(data, safe=False)
+@api_view(['GET'])
+def reservationId(request,pk):
+    reservation = Reservation.objects.get(id=pk)
+    serializer = ReservationSerializer(reservation, many=False)
+    data = {
+        'data': serializer.data,
+        'message': 'reservation listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
+
+@api_view(['POST'])
+def reservationCreate(request):
+    token = request.data['jwt']
+    payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    user = User.objects.get(id=payload['id'])
+    request.data['user'] = user.id
+    serializer = ReservationSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save(user=user)
+    else:
+        return JsonResponse(({'message' : 'You cant book a field right now','status':400}))
+    return JsonResponse(({'message' : 'reservation added successfully','status':200}))
 
 #CRUD for COMPLEXE
 
@@ -75,6 +126,7 @@ def complexeCreate(request):
         return JsonResponse(({'message' : 'Only hosts can add complexes','status':401}))
     user = User.objects.get(id=payload['id'])
     request.data['user'] = user.id
+    print(request.data)
     serializer = ComplexeSportifSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         complexe = serializer.save(user=user)
@@ -121,7 +173,54 @@ def complexeDelete(request,pk):
     return JsonResponse(({'message' : 'complexe deleted succesfully','status':200}))
 
 
+@api_view(['GET'])
+def complexe_sportif_utilisateur(request, utilisateur_id):
+    complexes = ComplexeSportif.objects.filter(user=utilisateur_id)
+    data = []
+    for complexe in complexes:
+        complexe_data = {
+            'id': complexe.id,
+            'name': complexe.name,
+            'adresse': complexe.adresse,
+            'lattitude': complexe.lattitude,
+            'longtitude': complexe.longtitude,
+            'description': complexe.description,
+            'zone': complexe.zone.id,
+            'user': complexe.user.id,
+            'url': complexe.url
+        }
+        data.append(complexe_data)
+    return Response(data)
+
 #CRUD for fields 
+
+@api_view(['GET'])
+def complex_terrains(request, complex_id):
+
+    complexe = ComplexeSportif.objects.get(id=complex_id)
+    terrains = Terrain.objects.filter(category__complexeSportif=complexe)
+
+    data = []
+    for terrain in terrains:
+        terrain_data = {}
+        terrain_data['id'] = terrain.id
+        terrain_data['Fieldname'] = terrain.name
+        terrain_data['Complexename'] = terrain.category.complexeSportif.name
+        terrain_data['address'] = terrain.category.complexeSportif.adresse
+        terrain_data['price'] = terrain.category.price
+        terrain_data['number_of_players'] = terrain.number_of_players
+        terrain_data['reserved'] = terrain.is_reserved
+        terrain_data['area'] = terrain.category.area
+        terrain_data['complex_photo']= terrain.category.complexeSportif.url
+
+        # Photo du terrain
+        terrain_photo = terrain.photo_set.first()
+        if terrain_photo:
+            terrain_data['terrain_photo'] = terrain_photo.url
+
+        data.append(terrain_data)
+
+    return Response(data)
 
 # retourner fields #########################
 @api_view(['GET'])
@@ -130,8 +229,10 @@ def list_fields(request):
     data = []
     for terrain in terrains:
         terrain_data = {}
-        terrain_data['Field name'] = terrain.name
-        terrain_data['Complexe name'] = terrain.category.complexeSportif.name
+        terrain_data['id'] = terrain.id
+        terrain_data['Fieldname'] = terrain.name
+        terrain_data['Complexename'] = terrain.category.complexeSportif.name
+        terrain_data['address'] = terrain.category.complexeSportif.adresse
         terrain_data['price'] = terrain.category.price
         terrain_data['number_of_players'] = terrain.number_of_players
         terrain_data['reserved'] = terrain.is_reserved
@@ -147,6 +248,8 @@ def list_fields(request):
         data.append(terrain_data)
 
     return Response(data)
+
+
 
 
 #############################################
@@ -167,13 +270,20 @@ def fieldCreate(request):
     data = request.data['fields']
     for field in data:
         typeTerrain = field['category']
-        category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).first()
+        category = CategoryTerrain.objects.filter(typeTerrain=typeTerrain).last()
         field['category']= category.id
         serializer = TerrainSerializer(data=field)
         if serializer.is_valid():
-            serializer.save()
+            terrain = serializer.save()
+            photo_data = {'url': field['url'], 'terrain': terrain.id}
+            photo_serializer = PhotoSerializer(data=photo_data)
+            if photo_serializer.is_valid():
+                photo_serializer.save()
+            else:
+                terrain.delete()
+                return JsonResponse(({'message': 'Invalid photo data', 'status': 400}))
         else:
-            return JsonResponse(({'message' : 'Invalid Data','status':400}))
+            return JsonResponse(({'message' : 'Invalid Terrain Data','status':400}))
     return JsonResponse(({'message' : 'field created succesfully','status':200}))
 
 @api_view(['POST'])
@@ -221,7 +331,7 @@ def fieldList(request):
         serialized_data = serializer.data
         serialized_data['terrain_photos'] = photo_serializer.data
         data.append({'terrain': serialized_data})
-    return JsonResponse({'data': data, 'message': 'fields listed successfully', 'status': 200})
+    return JsonResponse({'data': data, 'message': 'field listed successfully', 'status': 200})
 
 
 
@@ -267,7 +377,7 @@ def fieldCategoryId(request,pk):
     serializer = CategoryTerrainSerializer(categoryterrain, many=False)
     data = {
         'data': serializer.data,
-        'message': 'field category listed successfully',
+        'message': 'field categories listed successfully',
         'status': 200
     }
     return JsonResponse(data)
@@ -354,7 +464,7 @@ def photoList(request):
     serializer =PhotoSerializer(photo, many=True)
     data = {
         'data': serializer.data,
-        'message': 'photos listed successfully',
+        'message': 'field categories listed successfully',
         'status': 200
     }
     return JsonResponse(data)
@@ -363,7 +473,7 @@ def photoList(request):
 def photoId(request,pk):
     data = {
         'data': serializer.data,
-        'message': 'photo listed successfully',
+        'message': 'field categories listed successfully',
         'status': 200
     }
     photo = Photo.objects.get(id=pk)

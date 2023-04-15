@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ville, Zone, ComplexeSportif, Terrain, Photo, CategoryTerrain
+from .models import Ville, Zone, ComplexeSportif, Terrain, Photo, CategoryTerrain, Reservation
 
 class VilleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +15,7 @@ class ComplexeSportifSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
         model = ComplexeSportif
-        fields = ['id', 'name', 'adresse','description','lattitude', 'longtitude', 'zone', 'user']
+        fields = ['id', 'name', 'adresse','description','lattitude', 'longtitude', 'zone', 'user','url']
         read_only_fields = ['id']
 
 class CategoryTerrainSerializer(serializers.ModelSerializer):
@@ -30,4 +30,8 @@ class TerrainSerializer(serializers.ModelSerializer):
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
+        fields = '__all__'
+class ReservationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservation
         fields = '__all__'
