@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ville, Zone, ComplexeSportif, Terrain, Photo, CategoryTerrain, Reservation
+from .models import Ville, Zone, ComplexeSportif, Terrain, Photo, CategoryTerrain, Reservation, Post
 
 class VilleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,4 +34,9 @@ class PhotoSerializer(serializers.ModelSerializer):
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
+        fields = '__all__'
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
         fields = '__all__'

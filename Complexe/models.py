@@ -47,3 +47,13 @@ class Reservation(models.Model):
     # is_expired = models.BooleanField(default=False)
     # is_canceled_by_complex = models.BooleanField(default=False)
     # is_canceled_by_user = models.BooleanField(default=False)
+
+class Post(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField()
+    time = models.TimeField()
+    number_of_players_needed = models.IntegerField()
+    number_of_players_available = models.IntegerField()
+    description = models.TextField()
+    terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
+    post_reservation = models.ManyToManyField(Reservation, blank=True)

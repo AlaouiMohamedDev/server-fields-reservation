@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
-from .serializers import ComplexeSportifSerializer,TerrainSerializer,CategoryTerrainSerializer,PhotoSerializer,ReservationSerializer
-from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo,Reservation
+from .serializers import ComplexeSportifSerializer,TerrainSerializer,CategoryTerrainSerializer,PhotoSerializer,ReservationSerializer,PostSerializer
+from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo,Reservation,Post
 import jwt
 from rest_framework.decorators import api_view
 from users.models import User
@@ -38,6 +38,14 @@ def apiOverview(request):
         'List Reservation':'/reservation-list/',
         'Get Specific Reservation':'/reservation-Id/<str:pk>/',
         'create Reservation':'/reservation-create/',
+        'update Reservation':'/reservation-update/<str:pk>/',
+        'delete Reservation':'/reservation-delete/<str:pk>/',
+        '__________________________':'__________________________',
+        'List Post':'/post-list/',
+        'Get Specific Post':'/post-Id/<str:pk>/',
+        'create Post':'/post-create/',
+        'update Post':'/post-update/<str:pk>/',
+        'delete Post':'/post-delete/<str:pk>/',
     }
     return Response(api_urls,  status=status.HTTP_200_OK)
 #Crud for Reservations
@@ -88,7 +96,20 @@ def reservationCreate(request):
     else:
         return JsonResponse(({'message' : 'You cant book a field right now','status':400}))
     return JsonResponse(({'message' : 'reservation added successfully','status':200}))
-
+@api_view(['POST'])
+def reservationUpdate(request,pk):
+    reservation = Reservation.objects.get(id=pk)
+    serializer = ReservationSerializer(instance=reservation, data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        return JsonResponse(({'message' : 'Invalid Data','status':400}))
+    return JsonResponse(({'message' : 'reservation updated successfully','status':200}))
+@api_view(['DELETE'])
+def reservationDelete(request,pk):
+    reservation = Reservation.objects.get(id=pk)
+    reservation.delete()
+    return JsonResponse(({'message' : 'reservation deleted successfully','status':200}))
 #CRUD for COMPLEXE
 
 @api_view(['GET'])
@@ -534,3 +555,49 @@ def photoDelete(request,pk):
     photo.delete()
     return JsonResponse(({'message' : 'field picture deleted succesfully','status':200}))
 
+#CRUD for Post
+@api_view(['GET'])
+def postList(request):
+    post = Post.objects.all()
+    serializer =PostSerializer(post, many=True)
+    data = {
+        'data': serializer.data,
+        'message': 'field posts listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
+@api_view(['GET'])
+def postId(request,pk):
+    post = Post.objects.get(id=pk)
+    serializer = PostSerializer(post, many=False)
+    data = {
+        'data': serializer.data,
+        'message': 'field post listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
+@api_view(['POST'])
+def postCreate(request):
+    token = request.data['jwt']
+    payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    user = User.objects.get(id=payload['id'])
+    serializer = PostSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(user=user)
+    else:
+        return JsonResponse(({'message' : 'Invalid Data','status':400}))
+    return JsonResponse(({'message' : 'field post created succesfully','status':200}))
+@api_view(['POST'])
+def postUpdate(request,pk):
+    post = Post.objects.get(id=pk)
+    serializer = PostSerializer(instance = post,data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        return JsonResponse(({'message' : 'Invalid Data','status':400}))
+    return JsonResponse(({'message' : 'field post updated succesfully','status':200}))
+@api_view(['DELETE'])
+def postDelete(request,pk):
+    post = Post.objects.get(id=pk)
+    post.delete()
+    return JsonResponse(({'message' : 'field post deleted succesfully','status':200}))
