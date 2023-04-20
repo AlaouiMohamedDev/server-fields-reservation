@@ -78,7 +78,7 @@ def reservationList(request):
             'approved':reservation.approved_rejected
         }
         data.append(reservation)
-    return JsonResponse(data, safe=False)
+    return JsonResponse(data[::-1], safe=False)
 @api_view(['GET'])
 def reservationId(request,pk):
     reservation = Reservation.objects.get(id=pk)
