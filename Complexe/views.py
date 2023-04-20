@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
@@ -94,10 +95,15 @@ def reservationCreate(request):
     request.data['user'] = user.id
     serializer = ReservationSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        serializer.save(user=user)
+        reservation = serializer.save(user=user)
+        data = {
+            'reservation_id': reservation.id,
+            'message': 'Reservation added successfully',
+            'status': 200
+        }
+        return JsonResponse(data)
     else:
         return JsonResponse(({'message' : 'You cant book a field right now','status':400}))
-    return JsonResponse(({'message' : 'reservation added successfully','status':200}))
 @api_view(['POST'])
 def reservationUpdate(request,pk):
     reservation = Reservation.objects.get(id=pk)
@@ -558,16 +564,34 @@ def photoDelete(request,pk):
     return JsonResponse(({'message' : 'field picture deleted succesfully','status':200}))
 
 #CRUD for Post
+# user name / terrain name/image  image complexe  reservation object
 @api_view(['GET'])
 def postList(request):
-    post = Post.objects.all()
-    serializer =PostSerializer(post, many=True)
-    data = {
-        'data': serializer.data,
-        'message': 'field posts listed successfully',
-        'status': 200
-    }
-    return JsonResponse(data)
+    posts = Post.objects.all()
+    data = []
+    for post in posts:
+        reservation = Reservation.objects.filter(post=post).first()
+        terrain = post.terrain
+        complexe = terrain.category.complexeSportif
+        user = post.user
+        # Photo du terrain
+        terrain_photo = terrain.photo_set.first()
+        if terrain_photo:
+            terrain_photo = terrain_photo.url
+        complexe_image = complexe.url if complexe else None
+        reservation_data = ReservationSerializer(reservation, many=False).data if reservation else None
+        post_data = {
+            'id': post.id,
+            'description': post.description,
+            'date': post.date,
+            'user_name': user.first_name + ' ' + user.last_name,
+            'terrain_photo': terrain_photo,
+            'terrain_name': terrain.name,
+            'complexe_image': complexe_image,
+            'reservation': reservation_data
+        }
+        data.append(post_data)
+    return JsonResponse({'data': data, 'message': 'posts listed successfully', 'status': 200})
 @api_view(['GET'])
 def postId(request,pk):
     post = Post.objects.get(id=pk)
@@ -578,17 +602,30 @@ def postId(request,pk):
         'status': 200
     }
     return JsonResponse(data)
+
+
 @api_view(['POST'])
 def postCreate(request):
     token = request.data['jwt']
-    payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    user = User.objects.get(id=payload['id'])
+    print(token)
+    if not token:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    print(payload['id'])
+    user = User.objects.filter(id=payload['id']).first()
+    print(user)
+    request.data['user'] = user.id
+    request.data['date'] = datetime.now()
     serializer = PostSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save(user=user)
+        serializer.save()
+        return JsonResponse(({'message' : 'post created successfully', 'status':200}))
     else:
-        return JsonResponse(({'message' : 'Invalid Data','status':400}))
-    return JsonResponse(({'message' : 'field post created succesfully','status':200}))
+        return JsonResponse(({'message' : 'Invalid Data', 'status':400}))
 @api_view(['POST'])
 def postUpdate(request,pk):
     post = Post.objects.get(id=pk)
@@ -605,7 +642,7 @@ def postDelete(request,pk):
     return JsonResponse(({'message' : 'field post deleted succesfully','status':200}))
 
 
-############################# Reservation
+############################# Reservation List Date Time ########################################
 
 @api_view(['GET'])
 def reservations(request):

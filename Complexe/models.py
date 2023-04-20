@@ -50,11 +50,9 @@ class Reservation(models.Model):
     # is_canceled_by_user = models.BooleanField(default=False)
 
 class Post(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField()
-    time = models.TimeField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
+    date = models.DateTimeField()
     number_of_players_needed = models.IntegerField()
-    number_of_players_available = models.IntegerField()
     description = models.TextField()
     terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
-    post_reservation = models.ManyToManyField(Reservation, blank=True)
+    post_reservation = models.ForeignKey(Reservation,on_delete=models.CASCADE,default=None)
