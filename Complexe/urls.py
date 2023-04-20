@@ -42,5 +42,6 @@ urlpatterns = [
     path('reservations/', reservations, name='reservations'),
     path('reservations/<int:reservation_id>/status/', check_reservation_status, name='reservation-status'),
     path('completed_reservations_post/',completedReservations, name='completed-reservations'),
+    path('approve-reservation/',approveReservation, name='approve-reservation'),
     path('fullReservations/', fullReservations, name='full-reservations'),
     ]

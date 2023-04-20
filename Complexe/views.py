@@ -73,7 +73,9 @@ def reservationList(request):
             'complexe': reservation.terrain.category.complexeSportif.url,
             'address': reservation.terrain.category.complexeSportif.adresse,
             'price': reservation.terrain.category.price,
-            'nameField': reservation.terrain.name
+            'nameField': reservation.terrain.name,
+            'owner':reservation.terrain.category.complexeSportif.user.id,
+            'approved':reservation.approved_rejected
         }
         data.append(reservation)
     return JsonResponse(data, safe=False)
@@ -594,7 +596,7 @@ def postList(request):
             'reservation': reservation_data
         }
         data.append(post_data)
-    return JsonResponse({'data': data})
+    return JsonResponse({'data': data[::-1]})
 @api_view(['GET'])
 def postId(request,pk):
     post = Post.objects.get(id=pk)
@@ -683,13 +685,54 @@ def reservations(request):
 @api_view(['GET'])
 def completedReservations(request):
     reservations = Reservation.objects.filter(post__number_of_players_needed=0)
-    serializer = ReservationSerializer(reservations, many=True)
-    data = {
-        'data': serializer.data,
-        'message': 'Completed reservations listed successfully',
-        'status': 200
-    }
-    return JsonResponse(data)
+    reservations1 = Reservation.objects.filter(post=None)
+    data = []
+    for reservation in reservations:
+        if reservation.approved_rejected == 'waiting':
+            day_name = reservation.date.strftime('%A')
+            terrain_photo_url = reservation.terrain.photo_set.first().url
+            reservation = {
+                'id':reservation.id,
+                'idField':reservation.terrain.id,
+                'date': reservation.date,
+                'day': day_name,
+                'from': reservation.startTime,
+                'to': reservation.endTime,
+                'name': reservation.user.first_name,
+                'userId': reservation.user.id,
+                'terrain': terrain_photo_url,
+                'complexe': reservation.terrain.category.complexeSportif.url,
+                'address': reservation.terrain.category.complexeSportif.adresse,
+                'price': reservation.terrain.category.price,
+                'nameField': reservation.terrain.name,
+                'owner':reservation.terrain.category.complexeSportif.user.id,
+            }
+            data.append(reservation)
+    for reservation in reservations1:
+        if reservation.approved_rejected == 'waiting':
+            day_name = reservation.date.strftime('%A')
+            terrain_photo_url = reservation.terrain.photo_set.first().url
+            reservation = {
+                'id':reservation.id,
+                'idField':reservation.terrain.id,
+                'date': reservation.date,
+                'day': day_name,
+                'from': reservation.startTime,
+                'to': reservation.endTime,
+                'name': reservation.user.first_name,
+                'userId': reservation.user.id,
+                'terrain': terrain_photo_url,
+                'complexe': reservation.terrain.category.complexeSportif.url,
+                'address': reservation.terrain.category.complexeSportif.adresse,
+                'price': reservation.terrain.category.price,
+                'nameField': reservation.terrain.name,
+                'owner':reservation.terrain.category.complexeSportif.user.id,
+            }
+            data.append(reservation)
+     # Order the data in decreasing order with respect to the 'id' field
+    data = sorted(data, key=lambda k: k['id'], reverse=True)
+
+    return JsonResponse({'data':data})
 
 @api_view(['GET'])
 def fullReservations(request):
@@ -715,4 +758,8 @@ def check_reservation_status(request, reservation_id):
         return JsonResponse({'message': 'rejected', 'status': 400})
     else:
         return JsonResponse({'message': 'Status unknown', 'status': 400})
+
+@api_view(['POST'])
+def approveReservation(request):
     
+    return JsonResponse(({'message' : 'field post deleted succesfully','status':200}))
