@@ -583,6 +583,8 @@ def postList(request):
         post_data = {
             'id': post.id,
             'description': post.description,
+            'maxPlayers' : terrain.number_of_players,
+            'neededPlayers' : post.number_of_players_needed,
             'date': post.date,
             'user_name': user.first_name + ' ' + user.last_name,
             'terrain_photo': terrain_photo,
@@ -591,7 +593,7 @@ def postList(request):
             'reservation': reservation_data
         }
         data.append(post_data)
-    return JsonResponse({'data': data, 'message': 'posts listed successfully', 'status': 200})
+    return JsonResponse({'data': data})
 @api_view(['GET'])
 def postId(request,pk):
     post = Post.objects.get(id=pk)
