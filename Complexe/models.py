@@ -36,6 +36,7 @@ class Reservation(models.Model):
     endTime = models.CharField(max_length=100,default=None)
     terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    approved_rejected = models.CharField(max_length=100,default=None)
     # is_confirmed = models.BooleanField(default=False)
     # is_canceled = models.BooleanField(default=False)
     # is_done = models.BooleanField(default=False)

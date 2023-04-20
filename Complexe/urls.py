@@ -38,4 +38,7 @@ urlpatterns = [
     path('list_fields/', views.list_fields, name='list_fields'),
     path('complexes/<int:complex_id>/terrains/', complex_terrains, name='complex-terrains'),
     path('utilisateur/<int:utilisateur_id>/complexes-sportifs/', complexe_sportif_utilisateur),
+    path('reservations/', reservations, name='reservations'),
+    path('reservations/<int:reservation_id>/status/', check_reservation_status, name='reservation-status'),
+
     ]

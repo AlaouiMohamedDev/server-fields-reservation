@@ -7,6 +7,8 @@ from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo,Reservation,Po
 import jwt
 from rest_framework.decorators import api_view
 from users.models import User
+from .models import Reservation
+from .serializers import ReservationSerializer
 # Create your views here.
 @api_view(['GET'])
 def apiOverview(request):
@@ -601,3 +603,39 @@ def postDelete(request,pk):
     post = Post.objects.get(id=pk)
     post.delete()
     return JsonResponse(({'message' : 'field post deleted succesfully','status':200}))
+
+
+############################# Reservation
+
+@api_view(['GET'])
+def reservations(request):
+    reservations = Reservation.objects.order_by('-id')
+    data = []
+    for res in reservations:
+        data.append({
+            'id': res.id,
+            'date': res.date,
+            'startTime': res.startTime,
+            'endTime': res.endTime,
+            'user_last_name': res.user.last_name,
+            'user_first_name': res.user.first_name,
+            'terrain': res.terrain.name,
+            'approved_rejected': res.approved_rejected,
+        })
+    return Response(data)
+
+
+
+def check_reservation_status(request, reservation_id):
+    try:
+        reservation = Reservation.objects.get(id=reservation_id)
+    except Reservation.DoesNotExist:
+        return JsonResponse({'message': 'Reservation not found', 'status': 404})
+
+    if reservation.approved_rejected == 'approved':
+        return JsonResponse({'message': 'approved', 'status': 400})
+    elif reservation.approved_rejected == 'rejected':
+        return JsonResponse({'message': 'rejected', 'status': 400})
+    else:
+        return JsonResponse({'message': 'Status unknown', 'status': 400})
+    
