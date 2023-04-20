@@ -661,7 +661,7 @@ def decrementPlayersNeeded(request,pk):
     post.number_of_players_needed -= 1
     post.save()
     return JsonResponse(({'message' : 'Number of players needed decremented successfully', 'status':200}))
-############################# Reservation List Date Time ########################################
+############################# Reservation Apis ########################################
 
 @api_view(['GET'])
 def reservations(request):
@@ -680,6 +680,27 @@ def reservations(request):
         })
     return Response(data)
 
+@api_view(['GET'])
+def completedReservations(request):
+    reservations = Reservation.objects.filter(post__number_of_players_needed=0)
+    serializer = ReservationSerializer(reservations, many=True)
+    data = {
+        'data': serializer.data,
+        'message': 'Completed reservations listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
+
+@api_view(['GET'])
+def fullReservations(request):
+    reservations = Reservation.objects.filter(post=None)
+    serializer = ReservationSerializer(reservations, many=True)
+    data = {
+        'data': serializer.data,
+        'message': 'Unassigned reservations listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
 
 
 def check_reservation_status(request, reservation_id):

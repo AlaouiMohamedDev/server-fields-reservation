@@ -41,5 +41,6 @@ urlpatterns = [
     path('utilisateur/<int:utilisateur_id>/complexes-sportifs/', complexe_sportif_utilisateur),
     path('reservations/', reservations, name='reservations'),
     path('reservations/<int:reservation_id>/status/', check_reservation_status, name='reservation-status'),
-
+    path('completed_reservations_post/',completedReservations, name='completed-reservations'),
+    path('fullReservations/', fullReservations, name='full-reservations'),
     ]
