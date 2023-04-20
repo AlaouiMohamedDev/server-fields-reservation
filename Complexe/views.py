@@ -49,6 +49,7 @@ def apiOverview(request):
         'create Post':'/post-create/',
         'update Post':'/post-update/<str:pk>/',
         'delete Post':'/post-delete/<str:pk>/',
+        'Decrement number of players needed': 'decrementPlayersNeeded/<str:pk>/'
     }
     return Response(api_urls,  status=status.HTTP_200_OK)
 #Crud for Reservations
@@ -643,7 +644,23 @@ def postDelete(request,pk):
     post.delete()
     return JsonResponse(({'message' : 'field post deleted succesfully','status':200}))
 
-
+@api_view(['POST'])
+def decrementPlayersNeeded(request,pk):
+    token = request.data['jwt']
+    if not token:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    post = Post.objects.get(id=pk)
+    if not post:
+        return JsonResponse(({'message' : 'Post not found', 'status':404}))
+    if post.number_of_players_needed <= 0:
+        return JsonResponse(({'message' : 'No more players needed', 'status':400}))
+    post.number_of_players_needed -= 1
+    post.save()
+    return JsonResponse(({'message' : 'Number of players needed decremented successfully', 'status':200}))
 ############################# Reservation List Date Time ########################################
 
 @api_view(['GET'])

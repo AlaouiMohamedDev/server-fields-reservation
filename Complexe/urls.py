@@ -33,6 +33,7 @@ urlpatterns = [
     path('post-list/', views.postList, name='post-list'),
     path('post-Id/<str:pk>/', views.postId, name='post-Id'),
     path('post-create/', views.postCreate, name='post-create'),
+    path('decrementPlayersNeeded/<str:pk>/', views.decrementPlayersNeeded, name='decrementPlayersNeeded'),
     path('post-update/<str:pk>/', views.postUpdate, name='post-update'),
     path('post-delete/<str:pk>/', views.postDelete, name='post-delete'),
     path('list_fields/', views.list_fields, name='list_fields'),
