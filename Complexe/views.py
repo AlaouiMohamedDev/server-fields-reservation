@@ -761,5 +761,18 @@ def check_reservation_status(request, reservation_id):
 
 @api_view(['POST'])
 def approveReservation(request):
-    
-    return JsonResponse(({'message' : 'field post deleted succesfully','status':200}))
+    reservation_id = request.data.get('reservation_id')
+    status = request.data.get('status')
+    if not reservation_id:
+        return JsonResponse({'message': 'Reservation id not provided', 'status': 400})
+    if not status:
+        return JsonResponse({'message': 'Status not provided', 'status': 400})
+    if status not in ['approved', 'rejected', 'waiting']:
+        return JsonResponse({'message': 'Invalid status provided', 'status': 400})
+    try:
+        reservation = Reservation.objects.get(id=reservation_id)
+    except Reservation.DoesNotExist:
+        return JsonResponse({'message': 'Reservation not found', 'status': 404})
+    reservation.approved_rejected = status
+    reservation.save()
+    return JsonResponse({'message': 'Reservation status updated successfully', 'status': 200})
