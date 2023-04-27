@@ -108,4 +108,24 @@ def update_user(request, user_id):
         'last_name': user.last_name
     })
 
+
+@api_view(['POST'])
+def update_profile_picture(request):
+    token = request.data['jwt']
+    if not token:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    print(payload['id'])
+    user = User.objects.filter(id=payload['id']).first()
+    profile_picture = request.get('profile_picture')
+    if profile_picture:
+        user.profile_picture = profile_picture
+        user.save()
+        return Response({ 'message': 'Profile picture updated successfully', 'status':200})
+    else:
+        return Response({'error': 'No profile picture provided.','status':200} )
     
