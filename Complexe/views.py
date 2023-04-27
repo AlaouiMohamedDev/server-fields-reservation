@@ -775,3 +775,60 @@ def approveReservation(request):
     reservation.approved_rejected = status
     reservation.save()
     return JsonResponse({'message': 'Reservation status updated successfully', 'status': 200})
+
+
+#List all reservations with their status
+@api_view(['GET'])
+def reservationsStatus(request):
+    reservations = Reservation.objects.filter(post__number_of_players_needed=0)
+    reservations1 = Reservation.objects.filter(post=None)
+    data = []
+    for reservation in reservations:
+        day_name = reservation.date.strftime('%A')
+        terrain_photo_url = reservation.terrain.photo_set.first()
+        if terrain_photo_url:
+            terrain_photo_url = terrain_photo_url.url
+        reservation = {
+            'id':reservation.id,
+            'idField':reservation.terrain.id,
+            'date': reservation.date,
+            'day': day_name,
+            'from': reservation.startTime,
+            'to': reservation.endTime,
+            'name': reservation.user.first_name,
+            'userId': reservation.user.id,
+            'terrain': terrain_photo_url,
+            'complexe': reservation.terrain.category.complexeSportif.url,
+            'address': reservation.terrain.category.complexeSportif.adresse,
+            'price': reservation.terrain.category.price,
+            'nameField': reservation.terrain.name,
+            'owner':reservation.terrain.category.complexeSportif.user.id,
+            'status': reservation.approved_rejected
+        }
+        data.append(reservation)
+    for reservation in reservations1:
+        day_name = reservation.date.strftime('%A')
+        terrain_photo_url = reservation.terrain.photo_set.first()
+        if terrain_photo_url:
+            terrain_photo_url = terrain_photo_url.url
+        reservation = {
+            'id':reservation.id,
+            'idField':reservation.terrain.id,
+            'date': reservation.date,
+            'day': day_name,
+            'from': reservation.startTime,
+            'to': reservation.endTime,
+            'name': reservation.user.first_name,
+            'userId': reservation.user.id,
+            'terrain': terrain_photo_url,
+            'complexe': reservation.terrain.category.complexeSportif.url,
+            'address': reservation.terrain.category.complexeSportif.adresse,
+            'price': reservation.terrain.category.price,
+            'nameField': reservation.terrain.name,
+            'owner':reservation.terrain.category.complexeSportif.user.id,
+            'status': reservation.approved_rejected
+        }
+        data.append(reservation)
+        data = sorted(data, key=lambda k: k['id'], reverse=True)
+
+    return JsonResponse({'data':data})
