@@ -102,7 +102,7 @@ def update_user(request, user_id):
             user.save()
             return Response({'message': 'Profile Information updated successfully', 'status':200})
         else:
-            return Response({'error': 'Incorrect password', 'status': 400})
+            return Response({'message': 'Incorrect password', 'status': 400})
 
 
 @api_view(['POST'])
