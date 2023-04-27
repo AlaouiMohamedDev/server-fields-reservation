@@ -83,6 +83,29 @@ class LogoutView(APIView):
         response.data={
             'message':'Logged out Succesfully','status':200}
         return response
-    
+
+
+################################ User update
+@api_view(['PUT'])
+def update_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response(status=404) 
+    data = request.data
+    if 'first_name' in data:
+        user.first_name = data['first_name']
+    if 'last_name' in data:
+        user.last_name = data['last_name']
+    if 'password' in data:
+        user.set_password(data['password'])
+    user.save()
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name
+    })
 
     
