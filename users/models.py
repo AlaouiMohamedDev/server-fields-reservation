@@ -26,6 +26,7 @@ class User(AbstractUser):
     is_staff=None
     is_superuser=None
     last_login=None
+    profile_pic=models.CharField(max_length=255,blank=True,null=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [first_name,last_name]
 """

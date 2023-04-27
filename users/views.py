@@ -3,12 +3,10 @@ from django.http import JsonResponse
 from .serializers import UserSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed
 from .models import User
 import jwt
 import datetime
-from rest_framework import status
-
+from rest_framework.decorators import api_view
 # Create your views here.
 
 
@@ -20,6 +18,7 @@ class RegisterView(APIView):
             return JsonResponse(({'message' : 'registered successfully',
                         'status':200}))
         else:
+            print(serializer.errors)
             return JsonResponse(({'message' : 'Invalid Credentials',
                     'status':401}))
             
@@ -53,6 +52,7 @@ class LoginView(APIView):
                 'username': user.username,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
+                'profile_pic': user.profile_pic,
                 'role': user.role
             },
             'message' : 'login successfully',
@@ -84,5 +84,27 @@ class LogoutView(APIView):
             'message':'Logged out Succesfully','status':200}
         return response
     
+# views.py
 
+@api_view(['POST'])
+def updateUser(request):
+    token = request.data['jwt']
+    if not token:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    user = User.objects.filter(id=payload['id']).first()
+    if not user:
+        return JsonResponse(({'message' : 'User not found', 'status':404}))
+    request_data = request.data.copy()
+    request_data.pop('jwt', None)
+    serializer = UserSerializer(instance=user, data=request.data, partial=True)
+    if serializer.is_valid():
+        request_data.pop('password', None)
+        User.objects.filter(id=payload['id']).update(**request_data)
+        return JsonResponse(({'message' : 'User updated successfully', 'status':200}))
+    else:
+        return JsonResponse(({'message' : 'Invalid Data', 'status':400}))
     
