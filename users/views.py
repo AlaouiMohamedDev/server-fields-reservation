@@ -121,9 +121,10 @@ def update_profile_picture(request):
         return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
     print(payload['id'])
     user = User.objects.filter(id=payload['id']).first()
-    profile_picture = request.get('profile_picture')
+    profile_picture = request.data['profile_pic']
+    print(profile_picture)
     if profile_picture:
-        user.profile_picture = profile_picture
+        user.profile_pic = profile_picture
         user.save()
         return Response({ 'message': 'Profile picture updated successfully', 'status':200})
     else:
