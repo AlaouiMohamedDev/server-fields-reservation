@@ -84,27 +84,5 @@ class LogoutView(APIView):
             'message':'Logged out Succesfully','status':200}
         return response
     
-# views.py
 
-@api_view(['POST'])
-def updateUser(request):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
-    user = User.objects.filter(id=payload['id']).first()
-    if not user:
-        return JsonResponse(({'message' : 'User not found', 'status':404}))
-    request_data = request.data.copy()
-    request_data.pop('jwt', None)
-    serializer = UserSerializer(instance=user, data=request.data, partial=True)
-    if serializer.is_valid():
-        request_data.pop('password', None)
-        User.objects.filter(id=payload['id']).update(**request_data)
-        return JsonResponse(({'message' : 'User updated successfully', 'status':200}))
-    else:
-        return JsonResponse(({'message' : 'Invalid Data', 'status':400}))
     
