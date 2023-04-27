@@ -100,7 +100,7 @@ def update_user(request, user_id):
     if 'password' in data:
         if user.check_password(data['password']):
             user.save()
-            return Response({'message': 'Profile picture updated successfully', 'status':200})
+            return Response({'message': 'Profile Information updated successfully', 'status':200})
         else:
             return Response({'error': 'Incorrect password', 'status': 400})
 
