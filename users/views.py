@@ -98,15 +98,11 @@ def update_user(request, user_id):
     if 'last_name' in data:
         user.last_name = data['last_name']
     if 'password' in data:
-        user.set_password(data['password'])
-    user.save()
-    return Response({
-        'id': user.id,
-        'username': user.username,
-        'email': user.email,
-        'first_name': user.first_name,
-        'last_name': user.last_name
-    })
+        if user.check_password(data['password']):
+            user.save()
+            return Response({'message': 'Profile picture updated successfully', 'status':200})
+        else:
+            return Response({'error': 'Incorrect password', 'status': 400})
 
 
 @api_view(['POST'])
@@ -119,7 +115,6 @@ def update_profile_picture(request):
 
     except jwt.ExpiredSignatureError:
         return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
-    print(payload['id'])
     user = User.objects.filter(id=payload['id']).first()
     profile_picture = request.data['profile_pic']
     print(profile_picture)
