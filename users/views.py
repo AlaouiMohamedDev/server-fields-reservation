@@ -21,8 +21,93 @@ class RegisterView(APIView):
             print(serializer.errors)
             return JsonResponse(({'message' : 'Invalid Credentials',
                     'status':401}))
-            
 
+
+class GoogleRegister(APIView):
+    def post(self, request):
+        request.data['password'] = 'dKPH4$0&X3Oy'
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid() :
+            serializer.save()
+            return JsonResponse(({'message' : 'registered successfully',
+                        'status':200}))
+        else:
+            print(serializer.errors)
+            return JsonResponse(({'message' : 'Invalid Credentials',
+                    'status':401}))
+        
+class GoogleLogin(APIView):
+    def post(self, request):
+        email = request.data['email']
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            return JsonResponse(({'message' : 'Invalid Credentials',
+                    'status':401}))
+        payload = {
+            'id': user.id,
+            'role': user.role,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=6000),
+            'iat':  datetime.datetime.utcnow()
+        }
+        token = jwt.encode(payload, 'PLEASE WORK', algorithm='HS256')
+        response = Response()
+        response.set_cookie(key='jwt', value=token, httponly=True)
+        response.data = {
+            'jwt': token,
+             'user': {
+                'id': user.id,
+                'email': user.email,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'profile_pic': user.profile_pic,
+                'role': user.role
+            },
+            'message' : 'login successfully',
+            'status':200
+        }
+        return JsonResponse(response.data)
+class GoogleAuth(APIView):
+    def post(self, request):
+        email = request.data['email']
+        user = User.objects.filter(email=email).first()
+
+        if user is None:
+            # User doesn't exist, register them
+            request.data['password'] = 'dKPH4$0&X3Oy'
+            serializer = UserSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                user = serializer.instance
+            else:
+                return JsonResponse({'message': 'Invalid Credentials', 'status': 401})
+
+        # User exists, log them in
+        payload = {
+            'id': user.id,
+            'role': user.role,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=6000),
+            'iat':  datetime.datetime.utcnow()
+        }
+        token = jwt.encode(payload, 'PLEASE WORK', algorithm='HS256')
+        response = Response()
+        response.set_cookie(key='jwt', value=token, httponly=True)
+        response.data = {
+            'jwt': token,
+             'user': {
+                'id': user.id,
+                'email': user.email,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'profile_pic': user.profile_pic,
+                'role': user.role
+            },
+            'message': 'login successfully',
+            'status': 200
+        }
+        return JsonResponse(response.data)
 
 class LoginView(APIView):
     def post(self, request):

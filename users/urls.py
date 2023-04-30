@@ -6,7 +6,10 @@ from .views import *
 from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('register', RegisterView.as_view()),
+    path('googleRegister/', GoogleRegister.as_view()),
     path('login', LoginView.as_view()),
+    path('googleLogin/', GoogleLogin.as_view()),
+    path('googleAuth/', GoogleAuth.as_view()),
     path('user', UserView.as_view()),
     path('logout', LogoutView.as_view()),
     path('profile_pic/', views.update_profile_picture, name='profile_pic'),
