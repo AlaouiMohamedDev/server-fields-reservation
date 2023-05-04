@@ -872,3 +872,62 @@ def joinMatch(request):
         return JsonResponse(({'message' : 'Request to joined created successfully', 'status':200}))
     else:
         return JsonResponse(({'message' : 'Invalid Data', 'status':400}))
+    
+
+
+@api_view(['POST'])
+def decrementPlayersNeeded(request,pk):
+    token = request.data['jwt']
+    if not token:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    post = Post.objects.get(id=pk)
+    if not post:
+        return JsonResponse(({'message' : 'Post not found', 'status':404}))
+    if post.number_of_players_needed <= 0:
+        return JsonResponse(({'message' : 'No more players needed', 'status':400}))
+    
+    post.number_of_players_needed -= 1
+    post.save()
+
+    joinId = request.data['joinId']
+    join = Joined.objects.get(id=joinId)
+
+    join.accepted = "Accepted"
+    join.save()
+
+    if post.number_of_players_needed == 0:
+        joindList = Joined.objects.filter(post=post.id)
+        for ele in joindList:
+            if ele.accepted != "Accepted":
+                ele.accepted = "Rejected"
+                ele.save()
+                
+    
+
+    return JsonResponse(({'message' : 'Request accepted successfully', 'status':200}))
+
+
+
+
+
+@api_view(['POST'])
+def rejectPlayer(request,pk):
+    token = request.data['jwt']
+    if not token:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+   
+    joinId = request.data['joinId']
+    join = Joined.objects.get(id=joinId)
+
+    join.accepted = "Rejected"
+    join.save()
+    
+    return JsonResponse(({'message' : 'Request rejected successfully', 'status':200}))
