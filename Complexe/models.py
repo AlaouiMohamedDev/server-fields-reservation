@@ -56,3 +56,8 @@ class Post(models.Model):
     description = models.TextField()
     terrain = models.ForeignKey(Terrain, on_delete=models.CASCADE)
     post_reservation = models.ForeignKey(Reservation,on_delete=models.CASCADE,default=None)
+
+class Joined(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
+    accepted = models.CharField(max_length=100,default='Requested')
+    post = models.ForeignKey(Post,on_delete=models.CASCADE,default=None)

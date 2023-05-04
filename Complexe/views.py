@@ -4,11 +4,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from .serializers import ComplexeSportifSerializer,TerrainSerializer,CategoryTerrainSerializer,PhotoSerializer,ReservationSerializer,PostSerializer
-from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo,Reservation,Post
+from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo,Reservation,Post,Joined
 import jwt
 from rest_framework.decorators import api_view
 from users.models import User
-from .serializers import ReservationSerializer
+from .serializers import ReservationSerializer,JoinedSerializer
 # Create your views here.
 @api_view(['GET'])
 def apiOverview(request):
@@ -583,18 +583,24 @@ def postList(request):
             terrain_photo = terrain_photo.url
         complexe_image = complexe.url if complexe else None
         reservation_data = ReservationSerializer(reservation, many=False).data if reservation else None
+        joinList = Joined.objects.filter(post=post)
+        userJoined=[]
+        for j in joinList:
+            userJoined.append(j.user.id)
         post_data = {
             'id': post.id,
             'description': post.description,
             'maxPlayers' : terrain.number_of_players,
             'neededPlayers' : post.number_of_players_needed,
             'date': post.date,
+            'userId': user.id,
             'user_name': user.first_name + ' ' + user.last_name,
             'userImage':user.profile_pic,
             'terrain_photo': terrain_photo,
             'terrain_name': terrain.name,
             'complexe_image': complexe_image,
-            'reservation': reservation_data
+            'reservation': reservation_data,
+            'joined':userJoined
         }
         data.append(post_data)
     return JsonResponse({'data': data[::-1]})
@@ -623,7 +629,7 @@ def postCreate(request):
         return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
     print(payload['id'])
     user = User.objects.filter(id=payload['id']).first()
-    print(user)
+
     request.data['user'] = user.id
     request.data['date'] = datetime.now()
     serializer = PostSerializer(data=request.data)
@@ -647,23 +653,11 @@ def postDelete(request,pk):
     post.delete()
     return JsonResponse(({'message' : 'field post deleted succesfully','status':200}))
 
-@api_view(['POST'])
-def decrementPlayersNeeded(request,pk):
-    token = request.data['jwt']
-    if not token:
-        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
-    try:
-        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
-    except jwt.ExpiredSignatureError:
-        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
-    post = Post.objects.get(id=pk)
-    if not post:
-        return JsonResponse(({'message' : 'Post not found', 'status':404}))
-    if post.number_of_players_needed <= 0:
-        return JsonResponse(({'message' : 'No more players needed', 'status':400}))
-    post.number_of_players_needed -= 1
-    post.save()
-    return JsonResponse(({'message' : 'Number of players needed decremented successfully', 'status':200}))
+
+
+
+
+
 ############################# Reservation Apis ########################################
 
 @api_view(['GET'])
@@ -745,6 +739,7 @@ def fullReservations(request):
         'status': 200
     }
     return JsonResponse(data)
+
 
 
 def check_reservation_status(request, reservation_id):
