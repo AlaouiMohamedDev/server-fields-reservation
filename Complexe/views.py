@@ -830,3 +830,45 @@ def reservationsStatus(request):
         data = sorted(data, key=lambda k: k['id'], reverse=True)
 
     return JsonResponse({'data':data})
+
+@api_view(['GET'])
+def listJoined(request):
+    listjoined = Joined.objects.order_by('-id')
+    data = []
+    for joined in listjoined:
+        reservation = Reservation.objects.filter(post=joined.post.id)
+        serializer = ReservationSerializer(reservation, many=True)
+        data.append({
+        'id': joined.id,
+        'owner': joined.post.user.id,
+        'user': joined.user.id,
+        'ownerImage' : joined.post.user.profile_pic,
+        'ownerFirstName':joined.post.user.first_name,
+        'ownerLastName':joined.post.user.last_name,
+        'reservation': serializer.data[0]['date'],
+        'userFirstName':joined.user.first_name,
+        'userLastName':joined.user.last_name,
+        'userImage':joined.user.profile_pic,
+        'postid':joined.post.id,
+        'field':joined.post.terrain.name,
+        'request':joined.accepted
+        })
+    return JsonResponse({"data":data})
+
+
+@api_view(['POST'])
+def joinMatch(request):
+    token = request.data['jwt']
+    if not token:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Invalid Credentials', 'status':401}))
+
+    serializer = JoinedSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(({'message' : 'Request to joined created successfully', 'status':200}))
+    else:
+        return JsonResponse(({'message' : 'Invalid Data', 'status':400}))
