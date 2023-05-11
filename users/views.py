@@ -138,7 +138,9 @@ class LoginView(APIView):
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'profile_pic': user.profile_pic,
-                'role': user.role
+                'role': user.role,
+                'lat':user.lat,
+                'long':user.lng
             },
             'message' : 'login successfully',
             'status':200
@@ -182,6 +184,10 @@ def update_user(request, user_id):
         user.first_name = data['first_name']
     if 'last_name' in data:
         user.last_name = data['last_name']
+    if 'lat' in data:
+        user.lat = data['lat']
+    if 'long' in data:
+        user.lng = data['long']
     if 'password' in data:
         if user.check_password(data['password']):
             user.save()

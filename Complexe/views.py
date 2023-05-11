@@ -265,6 +265,8 @@ def list_fields(request):
         terrain_data['Fieldname'] = terrain.name
         terrain_data['Complexename'] = terrain.category.complexeSportif.name
         terrain_data['address'] = terrain.category.complexeSportif.adresse
+        terrain_data['lat'] = terrain.category.complexeSportif.lattitude
+        terrain_data['long'] = terrain.category.complexeSportif.longtitude
         terrain_data['price'] = terrain.category.price
         terrain_data['number_of_players'] = terrain.number_of_players
         terrain_data['reserved'] = terrain.is_reserved

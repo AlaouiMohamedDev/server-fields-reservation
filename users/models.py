@@ -21,6 +21,8 @@ class User(AbstractUser):
     email=models.CharField(max_length=255,unique=True)
     password=models.CharField(max_length=255)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=CLIENT)
+    lat = models.DecimalField(max_digits = 22,decimal_places = 20 ,default=31.6144592)
+    lng = models.DecimalField(max_digits = 22,decimal_places = 20 ,default=-7.9669165)
     username=None
     is_active = models.BooleanField(default=True)
     is_staff=None
