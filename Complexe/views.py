@@ -9,6 +9,12 @@ import jwt
 from rest_framework.decorators import api_view
 from users.models import User
 from .serializers import ReservationSerializer,JoinedSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.models import User, Group
+
+
+
 # Create your views here.
 @api_view(['GET'])
 def apiOverview(request):
@@ -933,3 +939,23 @@ def rejectPlayer(request,pk):
     join.save()
     
     return JsonResponse(({'message' : 'Request rejected successfully', 'status':200}))
+
+
+## approve user "host"
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def approve_host(request, user_id):
+    if not request.user.groups.filter(name='admin').exists():
+        return Response({'message': 'Only admins can approve user accounts'}, status=401)
+    try:
+        user = User.objects.get(id=user_id, is_active=False, groups__name='host')
+    except User.DoesNotExist:
+        return Response({'message': 'User not found or account is already approved'}, status=404)
+    
+    approved_hosts_group, created = Group.objects.get_or_create(name='approved_hosts')
+    user.groups.add(approved_hosts_group)
+    
+    user.is_active = True
+    user.save()
+    
+    return Response({'message': 'User account has been approved'}, status=200)

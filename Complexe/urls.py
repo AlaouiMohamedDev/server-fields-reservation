@@ -48,4 +48,6 @@ urlpatterns = [
     path('list-joined/', listJoined, name='list-joined'),
     path('decrementPlayersNeeded/<str:pk>/', views.decrementPlayersNeeded, name='decrementPlayersNeeded'),
     path('rejectPlayer/<str:pk>/', views.rejectPlayer, name='rejectPlayer'),
+    path('approve-host-account/<int:user_id>/', approve_host, name='approve_host_account'),
+
     ]
