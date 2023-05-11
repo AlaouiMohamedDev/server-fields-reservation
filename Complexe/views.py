@@ -946,11 +946,11 @@ def rejectPlayer(request,pk):
 @permission_classes([IsAuthenticated])
 def approve_host(request, user_id):
     if not request.user.groups.filter(name='admin').exists():
-        return Response({'message': 'Only admins can approve user accounts'}, status=401)
+        return Response({'message': 'Only admins can approve user accounts','status':404})
     try:
         user = User.objects.get(id=user_id, is_active=False, groups__name='host')
     except User.DoesNotExist:
-        return Response({'message': 'User not found or account is already approved'}, status=404)
+        return Response({'message': 'User not found or account is already approved','status':404})
     
     approved_hosts_group, created = Group.objects.get_or_create(name='approved_hosts')
     user.groups.add(approved_hosts_group)
@@ -958,17 +958,17 @@ def approve_host(request, user_id):
     user.is_active = True
     user.save()
     
-    return Response({'message': 'User account has been approved'}, status=200)
+    return Response({'message': 'User account has been approved','status':200})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def reject_host(request, user_id):
     if not request.user.groups.filter(name='admin').exists():
-        return Response({'message': 'Only admins can approve user accounts'}, status=401)
+        return Response({'message': 'Only admins can approve user accounts','status':404})
     try:
         user = User.objects.get(id=user_id, is_active=False, groups__name='host')
     except User.DoesNotExist:
-        return Response({'message': 'User not found or account is already approved'}, status=404)
+        return Response({'message': 'User not found or account is already approved','status':404})
     
     approved_hosts_group, created = Group.objects.get_or_create(name='approved_hosts')
     user.groups.add(approved_hosts_group)
@@ -976,4 +976,4 @@ def reject_host(request, user_id):
     user.is_active = False
     user.save()
     
-    return Response({'message': 'User account has been approved'}, status=200)
+    return Response({'message': 'User account has been approved','status':200})
