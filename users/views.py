@@ -13,15 +13,15 @@ from rest_framework.decorators import api_view
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
-        if serializer.is_valid() :
-            serializer.save()
-            return JsonResponse(({'message' : 'registered successfully',
-                        'status':200}))
+        if serializer.is_valid():
+            user = serializer.save()
+            if user.role == 'host':
+                user.is_active = False
+                user.save()
+            return JsonResponse({'message': 'registered successfully', 'status': 200})
         else:
             print(serializer.errors)
-            return JsonResponse(({'message' : 'Invalid Credentials',
-                    'status':401}))
-
+            return JsonResponse({'message': 'Invalid Credentials', 'status': 401})
 
 class GoogleRegister(APIView):
     def post(self, request):
@@ -216,3 +216,13 @@ def update_profile_picture(request):
     else:
         return Response({'error': 'No profile picture provided.','status':200} )
     
+@api_view(['GET'])
+def userList(request):
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    data = {
+        'users': serializer.data,
+        'message': 'Users listed successfully',
+        'status': 200
+    }
+    return JsonResponse(data)
