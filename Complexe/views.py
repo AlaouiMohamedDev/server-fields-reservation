@@ -959,3 +959,21 @@ def approve_host(request, user_id):
     user.save()
     
     return Response({'message': 'User account has been approved'}, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def decline_host(request, user_id):
+    if not request.user.groups.filter(name='admin').exists():
+        return Response({'message': 'Only admins can approve user accounts'}, status=401)
+    try:
+        user = User.objects.get(id=user_id, is_active=False, groups__name='host')
+    except User.DoesNotExist:
+        return Response({'message': 'User not found or account is already approved'}, status=404)
+    
+    approved_hosts_group, created = Group.objects.get_or_create(name='approved_hosts')
+    user.groups.add(approved_hosts_group)
+    
+    user.is_active = False
+    user.save()
+    
+    return Response({'message': 'User account has been approved'}, status=200)
