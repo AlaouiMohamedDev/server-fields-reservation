@@ -979,18 +979,21 @@ def reject_host(request, user_id):
     return Response({'message': 'User account has been approved','status':200})
 
 @api_view(['POST'])
-def approveHosts(request,user_id):
+def approveHosts(request,email):
     token = request.data['jwt']
     if not token:
+        print('hi token')
         return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
     try:
         payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
         return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
     if not payload['role']== 'admin':
+        print('hi role')
         return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
-    user = User.objects.get(id=user_id)
+    user = User.objects.get(email=email)
     if not user:
+        print('hi user')
         return JsonResponse(({'message' : 'User not found','status':404}))
     user.is_active = True
     user.save()
