@@ -962,7 +962,7 @@ def approve_host(request, user_id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def decline_host(request, user_id):
+def reject_host(request, user_id):
     if not request.user.groups.filter(name='admin').exists():
         return Response({'message': 'Only admins can approve user accounts'}, status=401)
     try:
