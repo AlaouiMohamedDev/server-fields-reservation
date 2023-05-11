@@ -977,3 +977,39 @@ def reject_host(request, user_id):
     user.save()
     
     return Response({'message': 'User account has been approved','status':200})
+
+@api_view(['POST'])
+def approveHosts(request,user_id):
+    token = request.data['jwt']
+    if not token:
+        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
+    if not payload['role']== 'admin':
+        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
+    user = User.objects.get(id=user_id)
+    if not user:
+        return JsonResponse(({'message' : 'User not found','status':404}))
+    user.is_active = True
+    user.save()
+    return JsonResponse(({'message' : 'User approved successfully','status':200}))
+
+@api_view(['POST'])
+def rejectHosts(request,user_id):
+    token = request.data['jwt']
+    if not token:
+        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
+    try:
+        payload = jwt.decode(token,'PLEASE WORK',algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
+    if not payload['role']== 'admin':
+        return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
+    user = User.objects.get(id=user_id)
+    if not user:
+        return JsonResponse(({'message' : 'User not found','status':404}))
+    user.is_active = False
+    user.save()
+    return JsonResponse(({'message' : 'User approved successfully','status':200}))
