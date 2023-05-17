@@ -11,7 +11,7 @@ from users.models import User
 from .serializers import ReservationSerializer,JoinedSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
 
 
 
@@ -979,7 +979,7 @@ def reject_host(request, user_id):
     return Response({'message': 'User account has been approved','status':200})
 
 @api_view(['POST'])
-def approveHosts(request,email):
+def approveHosts(request,user_id):
     token = request.data['jwt']
     if not token:
         print('hi token')
@@ -991,7 +991,7 @@ def approveHosts(request,email):
     if not payload['role']== 'admin':
         print('hi role')
         return JsonResponse(({'message' : 'Only hosts can add photos','status':401}))
-    user = User.objects.get(email=email)
+    user = User.objects.get(id=user_id)
     if not user:
         print('hi user')
         return JsonResponse(({'message' : 'User not found','status':404}))
