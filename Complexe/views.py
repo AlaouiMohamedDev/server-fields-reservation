@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from .serializers import ComplexeSportifSerializer,TerrainSerializer,CategoryTerrainSerializer,PhotoSerializer,ReservationSerializer,PostSerializer
-from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo,Reservation,Post,Joined
+from .models import ComplexeSportif,Terrain,CategoryTerrain,Photo,Reservation,Post,Joined,Ville
 import jwt
 from rest_framework.decorators import api_view
 from users.models import User
@@ -12,7 +12,8 @@ from .serializers import ReservationSerializer,JoinedSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import Group
-
+import requests
+from bs4 import BeautifulSoup
 
 
 # Create your views here.
@@ -278,7 +279,10 @@ def list_fields(request):
         terrain_data['reserved'] = terrain.is_reserved
         terrain_data['area'] = terrain.category.area
         terrain_data['complex_photo']= terrain.category.complexeSportif.url
-
+        terrain_data['user_is_active'] = terrain.category.complexeSportif.user.is_active
+        terrain_data['city'] = terrain.category.complexeSportif.zone.ville.name
+        #category only first letter
+        terrain_data['category'] = int(terrain.category.typeTerrain[0])
         # Photo du terrain
         terrain_photo = terrain.photo_set.first()
         if terrain_photo:
@@ -290,6 +294,18 @@ def list_fields(request):
     return Response(data)
 
 
+#api to get first letter of category
+@api_view(['GET'])
+def list_categories_FL(request):
+    categories = CategoryTerrain.objects.all()
+    data = []
+    for category in categories:
+        category_data = {}
+        category_data['id'] = category.id
+        category_data['typeTerrain'] = category.typeTerrain[0]
+        data.append(category_data)
+
+    return Response(data)
 
 
 #############################################
@@ -1016,3 +1032,23 @@ def rejectHosts(request,user_id):
     user.is_active = False
     user.save()
     return JsonResponse(({'message' : 'User approved successfully','status':200}))
+
+##api to count number of reservations and cities and complexes
+@api_view(['GET'])
+def getStats(request):
+    reservations = Reservation.objects.all()
+    reservationsCount = len(reservations)
+    cities = Ville.objects.all()
+    citiesCount = len(cities)
+    complexes = ComplexeSportif.objects.all()
+    complexesCount = len(complexes)
+    return JsonResponse(({'reservationsCount' : reservationsCount,'citiesCount':citiesCount,'complexesCount':complexesCount,'status':200}))
+
+
+
+
+@api_view(['GET'])
+def getCititesScraping(request):
+    url = 'https://simplemaps.com/data/ma-cities'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')

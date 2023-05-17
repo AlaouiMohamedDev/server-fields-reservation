@@ -52,4 +52,6 @@ urlpatterns = [
     path('reject-host-account/<int:user_id>/', reject_host, name='reject_host_account'),
     path('approvehost/<int:user_id>/', approveHosts, name='approve_complex'),
     path('rejecthost/<int:user_id>/', rejectHosts, name='reject_complex'),
+    path('list_category_letter/',list_categories_FL, name='list_category_letter'),
+    path('get_stats/', getStats, name='get_stats'),
     ]
