@@ -1049,6 +1049,16 @@ def getStats(request):
 
 @api_view(['GET'])
 def getCititesScraping(request):
-    url = 'https://simplemaps.com/data/ma-cities'
+    url = "https://profilbaru.com/article/List_of_cities_in_Morocco"
     response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
+    soup = BeautifulSoup(response.content, "html.parser")
+    table = soup.find('table', {'class': 'wikitable sortable'})
+    rows = table.find_all("tr")
+    cityList = []
+    for row in rows:
+        cells = row.find_all("td")
+        if len(cells) > 2:
+            first_cell = cells[1].text.strip()
+            first_cell = first_cell.split("[")[0].strip()
+            cityList.append(first_cell)
+    return JsonResponse(({'cities' : cityList,'status':200}))
