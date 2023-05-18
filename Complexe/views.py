@@ -14,7 +14,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import Group
 import requests
 from bs4 import BeautifulSoup
-
+import json
 
 # Create your views here.
 @api_view(['GET'])
@@ -280,7 +280,7 @@ def list_fields(request):
         terrain_data['area'] = terrain.category.area
         terrain_data['complex_photo']= terrain.category.complexeSportif.url
         terrain_data['user_is_active'] = terrain.category.complexeSportif.user.is_active
-        terrain_data['city'] = terrain.category.complexeSportif.zone.ville.name
+        terrain_data['city'] = terrain.category.complexeSportif.city
         #category only first letter
         terrain_data['category'] = int(terrain.category.typeTerrain[0])
         # Photo du terrain
@@ -1040,8 +1040,7 @@ def rejectHosts(request,user_id):
 def getStats(request):
     reservations = Reservation.objects.all()
     reservationsCount = len(reservations)
-    cities = Ville.objects.all()
-    citiesCount = len(cities)
+    citiesCount = 66
     complexes = ComplexeSportif.objects.all()
     complexesCount = len(complexes)
     return JsonResponse(({'reservationsCount' : reservationsCount,'citiesCount':citiesCount,'complexesCount':complexesCount,'status':200}))
@@ -1063,4 +1062,6 @@ def getCititesScraping(request):
             first_cell = cells[1].text.strip()
             first_cell = first_cell.split("[")[0].strip()
             cityList.append(first_cell)
-    return JsonResponse(({'cities' : cityList,'status':200}))
+    with open('city_list.json', 'w') as f:
+        json.dump(cityList, f)
+    return JsonResponse(({'message' : 'Cities added successfully','status':200}))
