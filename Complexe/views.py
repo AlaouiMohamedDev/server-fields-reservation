@@ -298,15 +298,17 @@ def list_fields(request):
 @api_view(['GET'])
 def list_categories_FL(request):
     categories = CategoryTerrain.objects.all()
+    typeTerrain_set = set()
     data = []
     for category in categories:
-        category_data = {}
-        category_data['id'] = category.id
-        category_data['typeTerrain'] = category.typeTerrain[0]
-        data.append(category_data)
+        if category.typeTerrain[0] not in typeTerrain_set:
+            typeTerrain_set.add(category.typeTerrain[0])
+            category_data = {}
+            category_data['id'] = category.id
+            category_data['typeTerrain'] = category.typeTerrain[0]
+            data.append(category_data)
 
     return Response(data)
-
 
 #############################################
 
