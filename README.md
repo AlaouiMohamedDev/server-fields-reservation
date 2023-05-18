@@ -1,3 +1,4 @@
+![MasterHead](https://res.cloudinary.com/realmoro/image/upload/v1683230377/logo-name_o86ic6.png)
 # Kri Tirank
 
 This project is a football field reservation system that allows users to book a football field in their desired location. The system provides features like path tracing, geolocation, user authentication, booking process, and sport complex registration.
@@ -27,7 +28,9 @@ To install dependencies for this project run
     pip install Pyjwt
     pip install django-cors-headers
     pip install django-rest-passwordreset
-
+    pip install bs4
+    pip install requests
+    
 ```
 
 
