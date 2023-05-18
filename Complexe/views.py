@@ -224,7 +224,7 @@ def complexe_sportif_utilisateur(request, utilisateur_id):
             'lattitude': complexe.lattitude,
             'longtitude': complexe.longtitude,
             'description': complexe.description,
-            'zone': complexe.zone.id,
+            'city': complexe.city,
             'user': complexe.user.id,
             'url': complexe.url
         }
@@ -1075,9 +1075,14 @@ def getRevenueByCity(request):
     for reservation in reservations:
         cities.append(reservation.terrain.category.complexeSportif.city)
     cities = list(set(cities))
-    revenueByCity = {}
+    revenueByCity = []
     for city in cities:
-        revenueByCity[city] = 0
-    for reservation in reservations:
-        revenueByCity[reservation.terrain.category.complexeSportif.city] += reservation.terrain.category.price
-    return JsonResponse(({'revenueByCity' : revenueByCity,'status':200}))
+        revenue = 0
+        for reservation in reservations:
+            if reservation.terrain.category.complexeSportif.city == city:
+                revenue += reservation.terrain.category.price
+        revenueByCity.append({
+            'name': city,
+            'sales': revenue
+        })
+    return JsonResponse({'cities': revenueByCity,'status':200})

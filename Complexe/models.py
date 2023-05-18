@@ -12,7 +12,6 @@ class ComplexeSportif(models.Model):
     lattitude = models.DecimalField(max_digits = 22,decimal_places = 20)
     longtitude = models.DecimalField(max_digits = 22,decimal_places = 20)
     description = models.CharField(max_length=250,default=None)
-    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, null=True, blank=True, default=None)
     city = models.CharField(max_length=100,default=None)
     user = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
     url = models.CharField(max_length=250, null=True)    
