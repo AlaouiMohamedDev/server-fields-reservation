@@ -55,4 +55,5 @@ urlpatterns = [
     path('list_category_letter/',list_categories_FL, name='list_category_letter'),
     path('get_stats/', getStats, name='get_stats'),
     path('getCities_Scrapping/', getCititesScraping, name='getCities_Scrapping'),
+    path('getRevenueByCity/', getRevenueByCity, name='getRevenueByCity'),
     ]

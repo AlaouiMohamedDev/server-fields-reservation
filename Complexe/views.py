@@ -1065,3 +1065,19 @@ def getCititesScraping(request):
     with open('city_list.json', 'w') as f:
         json.dump(cityList, f)
     return JsonResponse(({'message' : 'Cities added successfully','status':200}))
+
+
+#api to get total revenue for each city
+@api_view(['GET'])
+def getRevenueByCity(request):
+    reservations = Reservation.objects.all()
+    cities = []
+    for reservation in reservations:
+        cities.append(reservation.terrain.category.complexeSportif.city)
+    cities = list(set(cities))
+    revenueByCity = {}
+    for city in cities:
+        revenueByCity[city] = 0
+    for reservation in reservations:
+        revenueByCity[reservation.terrain.category.complexeSportif.city] += reservation.terrain.category.price
+    return JsonResponse(({'revenueByCity' : revenueByCity,'status':200}))
